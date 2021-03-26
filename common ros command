@@ -1,0 +1,15 @@
+rosrun camera_calibration cameracalibrator.py  --size 8x6 --square 0.025 image:=/usb_cam/image_raw
+
+roslaunch usb_cam usb_cam-test.launch 
+ROS_NAMESPACE=usb_cam rosrun image_proc image_proc 
+rqt_image_view
+
+catkin config --extend /opt/ros/kinetic --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+roslaunch px4_control p200_precision_landing.launch
+
+roslaunch mavros px4.launch fcu_url:="/dev/ttyTHS2:921600"
+rosrun px4_control keyboard_control_px4.py
+
+rosrun image_view video_recorder image:=/usb_cam/image_raw  _max_depth_range:="0"
+

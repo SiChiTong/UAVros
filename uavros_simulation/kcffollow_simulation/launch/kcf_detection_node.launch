@@ -1,0 +1,7 @@
+<launch>       
+    <node name="kcf_detection_node" pkg="uavros_kcffollow_simulation" type="kcf_detection_node.py" respawn="false" output="screen">
+        <param name="subscriber" value="camera/rgb/image_raw"/>
+        <param name="config" value="camera_param_simulation.yaml"/>
+    </node>
+
+</launch>

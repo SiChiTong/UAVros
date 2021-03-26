@@ -1,0 +1,66 @@
+<launch> 
+
+	<!-- 
+	二维码降落
+	search_alt_：预定搜索高度
+	markers_id_ ：ar_markers 二维码数字
+    desire_pose_x、desire_pose_y、desire_pose_z：期望的飞机相对降落板的位置,当desire_pose_z小于0.3m时会自动降落
+	PidXY_p：x,y方向p项系数
+	PidXY_d：x,y方向d项系数
+	PidXY_i：x,y方向i项系数
+	PidZ_p：z方向p项系数
+	PidZ_d：z方向d项系数
+	PidZ_i：z方向i项系数
+	PidYaw_p：yaw方向的p系数
+	PidYaw_d：yaw方向的d系数
+	PidYaw_i：yaw方向的i系数
+
+	关于其中的yaw角度，yaw为0度的情况是：摄像头图像左上为"0"markers时
+	desire_yaw_:弧度值
+-->
+
+
+  <include file="$(find uavros_artaglanding)/launch/ar_track_camera_tx2.launch" >
+  </include>
+
+  <include file="$(find uavros_artaglanding)/launch/landing_pid.launch" >
+ 	<arg name="search_alt_" value="1.5" />
+ 	<arg name="markers_id_" value="0" /> <!-- 0 -->
+ 	<arg name="desire_pose_x" value="0" />
+ 	<arg name="desire_pose_y" value="0.052" /> <!--0.052--> <!-- y方向估计不准，多了0.052m -->
+ 	<arg name="desire_pose_z" value="1.2" />  <!-- z方向估计不准 -->
+ 	<arg name="desire_yaw_" value="0" /> <!-- 0 -->
+ 	<arg name="PidXY_p" value="2.1" /> <!-- 2.1 -->
+ 	<arg name="PidXY_d" value="1.5" /> <!-- 1.5 -->
+ 	<arg name="PidXY_i" value="0" /> <!-- 0.1 --> <!-- 有积分的话一会儿就到很大的速度了 -->   
+ 	<arg name="PidZ_p" value="0.1" /> <!-- 0.1 -->
+ 	<arg name="PidZ_d" value="0.05" /> <!-- 0.05 -->
+ 	<arg name="PidZ_i" value="0" /> <!-- 0 -->
+ 	<arg name="PidYaw_p" value="0.1" /> <!-- 0.1 -->
+ 	<arg name="PidYaw_d" value="0" /> <!-- 0 -->
+ 	<arg name="PidYaw_i" value="0" /> <!-- 0 -->
+	<arg name="Thres_count_detect" default="30" /> <!-- 30 -->
+	<arg name="Thres_count_approach" default="30" /> <!-- 40 -->
+	<arg name="Thres_count_small" default="40" /> <!-- 12 --> 
+	<arg name="landing_vel" default="-0.08" /> <!-- -0.22 -->
+  </include>
+
+    <!-- rviz view /-->
+    <arg name="rviz_display" default="false"/>
+    <group if="$(arg rviz_display)">
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find uavros_artaglanding)/launch/rviz_p200_config.rviz"/>
+    </group>
+
+
+    <!-- keyboard control 
+    <node pkg="px4_control" type="keyboard_control_px4.py" name="keyboard_control"/>
+    -->
+
+    <!-- mavros 
+    <include file="$(find mavros)/launch/px4.launch">
+	<arg name="fcu_url" value="/dev/ttyTHS2:921600" />
+    </include>
+    -->
+
+</launch>
+

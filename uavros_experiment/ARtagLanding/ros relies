@@ -1,0 +1,6 @@
+usb_cam    ros的摄像头发布图像包
+image-proc  ros图像矫正？
+image-pipeline  ？
+camera_calibration  相机标定？
+ar_track_alvar  ros的AR_TAG二维码识别包
+
