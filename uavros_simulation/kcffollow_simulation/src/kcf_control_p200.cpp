@@ -64,8 +64,8 @@ Eigen::Vector3d PX4Landing::KcfPidProcess(Eigen::Vector4d &currentAngle,float ex
 	w_out = kcfPID_w.p*PIDw.difference + kcfPID_w.d*PIDw.differential + kcfPID_w.i*PIDw.intergral;
 	PIDw.tempDiffer = PIDw.difference;
 
-	pidout[0] = v_out;
-	pidout[1] = w_out;
+	pidout[0] = v_out;//vx
+	pidout[1] = w_out; //改成vy了
 	pidout[2] = 0;
   return pidout;
 }
@@ -212,13 +212,13 @@ void PX4Landing::LandingStateUpdate()
 			
 			break;
 		case PREPARE:											//起飞到指定高度
-			posxyz_target[0] = px4_pose_[0];  //时刻给当前的gps位置，保证x、y方向不动
-			posxyz_target[1] = px4_pose_[1]; //时刻给当前的gps位置，保证x、y方向不动
-			posxyz_target[2] = search_alt_+temp_pos_drone[2]; //spx在气压计初始高度的基础上飞search_alt_高，如果高度准就不需要加初直了
-			//posxyz_target[2] = search_alt_;
+			posxyz_target[0] = px4_pose_[0];  //时刻给当前的gps位置，保证x、y方向不动?
+			posxyz_target[1] = px4_pose_[1]; //时刻给当前的gps位置，保证x、y方向不动?
+			//posxyz_target[2] = search_alt_+temp_pos_drone[2]; //spx在气压计初始高度的基础上飞search_alt_高，如果高度准就不需要加初直了
+			posxyz_target[2] = search_alt_;
 			OffboardControl_.send_pos_xyz(posxyz_target);
 			// OffboardControl_.send_pos_setpoint(posxyz_target, 0);
-			if((rel_alt_<=search_alt_+0.2) && (rel_alt_>=search_alt_-0.2) && kcf_state == true) //在预设高度上方，下方0.2米均视为可以进入下一阶段水平接近。
+			if((px4_pose_[2]<=search_alt_+0.2) && (px4_pose_[2]>=search_alt_-0.2) && kcf_state == true) //在预设高度上方，下方0.2米均视为可以进入下一阶段水平接近。
 			{
 				LandingState = APPROACH;
 				cout << "kcf_state=True" <<endl;
@@ -244,13 +244,13 @@ void PX4Landing::LandingStateUpdate()
 				{
 					command_vel = KcfPidProcess(kcf_angle,desireAngle_x,desireAngle_y);
 					cout << "APPROACH" <<endl;
-					cout << "command_v:" << command_vel[0] <<endl;
-					cout << "command_w:" << command_vel[1] <<endl;
+					cout << "command_vx:" << command_vel[0] <<endl;
+					cout << "command_vy:" << command_vel[1] <<endl;
 				}
 			  else
 				{
-					command_vel[0] = 0; //v
-					command_vel[1] = 0; //w
+					command_vel[0] = 0; //vx
+					command_vel[1] = 0; //vy
 					command_vel[2] = 0; //nothing
 					cout << "APPROACH:kcf not tracking!" <<endl;
 					//识别不到的判断最好加上滞环
@@ -258,11 +258,13 @@ void PX4Landing::LandingStateUpdate()
 					PIDw.intergral = 0;//以便再次识别到物体时速度从0开始PID计算
 				}
 
-				desire_xyVel_[0] = command_vel[0];//v 机头方向,gazebo中x轴向前，y轴向左。实际飞机x轴向右，y轴向前。（coordinate frame 8）
-				desire_xyVel_[1] = 0;
+				desire_xyVel_[0] = command_vel[0];//vx:melodic mavros中body系FLU，kinect mavros中body系RFU
+				desire_xyVel_[1] = command_vel[1];//vy
 				desire_xyVel_[2] = 0;
-				desire_yawVel_ = command_vel[1];//w
-				OffboardControl_.send_body_velxyz_setpoint(desire_xyVel_,desire_yawVel_);
+				desire_yawVel_ = 0;//w
+				//OffboardControl_.send_body_velxyz_setpoint(desire_xyVel_,desire_yawVel_);
+				OffboardControl_.send_body_velxy_posz_setpoint(desire_xyVel_,search_alt_);
+
 			}
 			break;
 

@@ -32,11 +32,11 @@
 	<arg name="Thres_count_small" default="40" /> <!-- 12 --> 
 	<arg name="landing_vel" default="-0.08" /> <!-- -0.22 -->
 
-	<param name="KCFv_p" value = "3"/><!-- 1.2 -->
-	<param name="KCFv_d" value = "0"/>
+	<param name="KCFv_p" value = "6"/><!-- 1.2 -->
+	<param name="KCFv_d" value = "2"/>
 	<param name="KCFv_i" value = "0"/>
-	<param name="KCFw_p" value = "1"/><!-- 0.5 -->
-	<param name="KCFw_d" value = "0"/>
+	<param name="KCFw_p" value = "6"/><!-- 0.5 -->
+	<param name="KCFw_d" value = "2"/>
 	<param name="KCFw_i" value = "0"/>
 	<param name="desireAngle_x" value = "0"/><!--rad -->
 	<param name="desireAngle_y" value = "0"/><!-- rad -->
