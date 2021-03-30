@@ -4,6 +4,7 @@ catkin_make --source Prometheus_control/control --build build/prometheus_control
 catkin_make --source uavros_simulation/uavros_gazebo --build build/uavros_gazebo
 catkin_make --source uavros_experiment/ARtagLanding --build build/uavros_artaglanding
 catkin_make --source uavros_simulation/kcffollow_simulation --build build/uavros_kcffollow_simulation
+catkin_make --source uavros_simulation/uavros_uavugv_sitl --build build/uavros_uavugv_sitl
 
 #to be modified
 #catkin_make --source Modules/object_detection --build build/object_detection
