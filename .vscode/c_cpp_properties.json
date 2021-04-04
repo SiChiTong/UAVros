@@ -1,0 +1,32 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/spx/UAVros/devel/include/**",
+        "/home/spx/rgbd_ws/devel/include/**",
+        "/home/spx/Prometheus/devel/include/**",
+        "/home/spx/mavros_controllers_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/spx/rgbd_ws/src/ros_astra_camera/include/**",
+        "/home/spx/mavros_controllers_ws/src/mavros_controllers/controller_msgs/include/**",
+        "/home/spx/mavros_controllers_ws/src/mavros_controllers/geometric_controller/include/**",
+        "/home/spx/mavros_controllers_ws/src/mav_comm/mav_msgs/include/**",
+        "/home/spx/mavros_controllers_ws/src/mav_comm/mav_planning_msgs/include/**",
+        "/home/spx/UAVros/Prometheus_control/control/include/**",
+        "/home/spx/Prometheus/Simulator/gazebo_simulator/include/**",
+        "/home/spx/Prometheus/Modules/mission/include/**",
+        "/home/spx/Prometheus/Modules/ground_station/include/**",
+        "/home/spx/mavros_controllers_ws/src/mavros_controllers/trajectory_publisher/include/**",
+        "/home/spx/UAVros/uavros_simulation/kcffollow_simulation/include/**",
+        "/home/spx/UAVros/uavros_simulation/uavros_uavugv_sitl/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}
