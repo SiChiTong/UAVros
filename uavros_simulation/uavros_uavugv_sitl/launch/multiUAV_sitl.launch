@@ -1,0 +1,104 @@
+<launch>
+
+  <arg name="world_path" default="$(find uavros_gazebo)/worlds/lawn.world" />
+  <arg name="vehicle" default="iris" />
+
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(arg world_path)"/>
+	</include>
+
+<group ns="uav1">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="ID" value="1"/>
+        <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find px4)/launch/single_vehicle_spawn.launch">
+            <arg name="x" value="1"/>
+            <arg name="y" value="0"/>
+            <arg name="z" value="0"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="mavlink_udp_port" value="14561"/>
+            <arg name="mavlink_tcp_port" value="4561"/>
+            <arg name="ID" value="$(arg ID)"/>
+            <arg name="gst_udp_port" value="$(eval 5600 + arg('ID'))"/>
+            <arg name="video_uri" value="$(eval 5600 + arg('ID'))"/>
+            <arg name="mavlink_cam_udp_port" value="$(eval 14530 + arg('ID'))"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+
+    <arg name="altitude" default = "2.5"/>
+    <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
+        <param name="alt_sp" value = "$(arg altitude)"/>
+    	  <param name="Kp_x" value = "1"/>
+        <param name="Kp_y" value = "1"/>
+        <param name="Kv_x" value = "0.7"/>
+        <param name="Kv_y" value = "0.7"/>
+    </node>
+
+    <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
+        <param name="alt_sp" value = "$(arg altitude)"/>
+        <param name="alpha" value = "0.5"/>
+        <param name="neighbor1_name" value = "ugv3"/>
+    </node>
+</group>
+
+<group ns="uav2">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="ID" value="2"/>
+        <arg name="fcu_url" default="udp://:14542@localhost:14582"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find px4)/launch/single_vehicle_spawn.launch">
+            <arg name="x" value="-1"/>
+            <arg name="y" value="0"/>
+            <arg name="z" value="0"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="mavlink_udp_port" value="14562"/>
+            <arg name="mavlink_tcp_port" value="4562"/>
+            <arg name="ID" value="$(arg ID)"/>
+            <arg name="gst_udp_port" value="$(eval 5600 + arg('ID'))"/>
+            <arg name="video_uri" value="$(eval 5600 + arg('ID'))"/>
+            <arg name="mavlink_cam_udp_port" value="$(eval 14530 + arg('ID'))"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+
+    <arg name="altitude" default = "3"/>
+    <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
+        <param name="alt_sp" value = "$(arg altitude)"/>
+    	  <param name="Kp_x" value = "1"/>
+        <param name="Kp_y" value = "1"/>
+        <param name="Kv_x" value = "0.7"/>
+        <param name="Kv_y" value = "0.7"/>
+    </node>
+
+    <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
+        <param name="alt_sp" value = "$(arg altitude)"/>
+        <param name="alpha" value = "0.5"/>
+        <param name="neighbor1_name" value = "ugv3"/>
+    </node>
+</group>
+
+
+  <arg name="visualization" default="true"/>
+  <group if="$(arg visualization)">
+      <node type="rviz" name="rviz" pkg="rviz" args="-d /home/spx/UAVros/uavros_simulation/uavros_uavugv_sitl/config/rviz_multi.rviz" />
+  </group>
+
+</launch>

@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="world_path" default="$(find uavros_gazebo)/worlds/precision_landing.world" />
+  <arg name="world_path" default="$(find uavros_gazebo)/worlds/lawn.world" />
   <arg name="vehicle" default="iris" />
 
   <include file="$(find uavros_gazebo)/launch/px4_gazebo_sitl.launch">
