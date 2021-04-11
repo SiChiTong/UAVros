@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="imu">
+
+    <xacro:macro name="imu" params="prefix:=imu">
+        <!-- Create laser reference frame -->
+        <link name="${prefix}_link">
+            <inertial>
+                <mass value="0.001" /> 
+                <origin xyz="0 0 0" />
+                <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+                         iyy="0.001" iyz="0.0"
+                         izz="0.001" />
+            </inertial>
+
+            <visual>
+                <origin xyz=" 0 0 0 " rpy="0 0 0" />
+                <geometry>
+                    <box size="0.04 0.04 0.03" />
+                </geometry>
+                <material name="black"/>
+            </visual>
+
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.04 0.04 0.03" />
+                </geometry>
+            </collision>
+        </link>
+        <gazebo reference="${prefix}_link">
+            <material>Gazebo/Black</material>
+        </gazebo>
+
+        <gazebo reference="${prefix}_link">
+            <gravity>true</gravity>
+        </gazebo>
+
+    </xacro:macro>
+</robot>

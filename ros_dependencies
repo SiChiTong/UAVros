@@ -5,4 +5,7 @@ camera_calibration  相机标定？
 ar_track_alvar  ros的AR_TAG二维码识别包
 python numba!  参考https://blog.csdn.net/benchuspx/article/details/109152810
 
+sudo apt install ros-melodic-effort-controllers 
+(racecar)
+
 
