@@ -19,10 +19,12 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   mavposeSub_ = nh_.subscribe("mavros/local_position/pose", 1, &uavCtrl::mavpose_cb, this, ros::TransportHints().tcpNoDelay());
   mavtwistSub_ = nh_.subscribe("mavros/local_position/velocity_local", 1, &uavCtrl::mavtwist_cb, this, ros::TransportHints().tcpNoDelay());
   leaderposeSub_ = nh_.subscribe("leader_pose_estimate", 1, &uavCtrl::leaderpose_cb, this, ros::TransportHints().tcpNoDelay()); 
-
+  cmdSub_ = nh_.subscribe("/cmd", 1, &uavCtrl::cmd_cb, this, ros::TransportHints().tcpNoDelay()); 
+  px4stateSub_ = nh_.subscribe("mavros/state", 1, &uavCtrl::px4state_cb, this, ros::TransportHints().tcpNoDelay());
   target_pose_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
 
   arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
+  setMode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
 
   cmdloop_timer_ = nh_.createTimer(ros::Duration(0.01), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
 
@@ -33,6 +35,10 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   nh_private_.param<double>("Kv_x", Kvel_x_, 0.2);
   nh_private_.param<double>("Kv_y", Kvel_y_, 0.2);
   nh_private_.param<double>("Kv_z", Kvel_z_, 0.0);
+  nh_private_.param<double>("init_x", init_x_, 0);
+  nh_private_.param<double>("init_y", init_y_, 0);
+  nh_private_.param<double>("h_omega", h_omega_, 0);
+  nh_private_.param<double>("h_radius", h_radius_, 0);
 
   Kpos_ << Kpos_x_, Kpos_y_, Kpos_z_;
   Kvel_ << Kvel_x_, Kvel_y_, Kvel_z_;
@@ -43,12 +49,50 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   leaderVel_ << 0.0, 0.0, 0.0;
   leaderAcc_ << 0.0, 0.0, 0.0; 
   acc_sp << 0.0, 0.0, 0.0;
+  hPos_ << 0.0, 0.0, 0.0;
+  hVel_ << 0.0, 0.0, 0.0;
+  hAcc_ << 0.0, 0.0, 0.0;
+  command_ = 0;
+  start_flag_ = 0;
+  start_time_ = 0;
 
 }
 
 void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
 {
-  computeAccCmd(acc_sp, leaderPos_, leaderVel_, leaderAcc_); //compute acceleration setpoint command by PD controller algorithm;
+  switch (command_)
+  {
+  case 0:
+    break;
+  case 1:
+    if (start_flag_ == 0)
+    {
+      start_time_ = ros::Time::now().toSec();
+    }
+    start_flag_ = 1;
+    if (px4_state_.mode != "OFFBOARD")
+    {
+        mode_cmd_.request.custom_mode = "OFFBOARD";
+				setMode_client_.call(mode_cmd_);
+    }
+    t_ = ros::Time::now().toSec() - start_time_;
+    double theta;
+    theta = h_omega_ * t_;
+    hPos_(0) = h_radius_ * cos(theta);
+    hPos_(1) = h_radius_ * sin(theta);
+    hVel_(0) = - h_radius_ * h_omega_* sin(theta);
+    hVel_(1) = h_radius_ * h_omega_* cos(theta);
+    hAcc_(0) = - h_radius_ * h_omega_* h_omega_ * cos(theta);
+    hAcc_(1) = - h_radius_ * h_omega_* h_omega_ * sin(theta);
+
+    computeAccCmd(acc_sp, leaderPos_ + hPos_, leaderVel_ + hVel_, leaderAcc_ + hAcc_); 
+    //compute acceleration setpoint command by PD controller algorithm;  
+    break; 
+  default:
+    cout << "error command!" << endl;
+    break;
+  }
+
   pubAccCmd(acc_sp);
 }
 
@@ -94,8 +138,8 @@ void uavCtrl::mavtwist_cb(const geometry_msgs::TwistStamped &msg)
 
 void uavCtrl::leaderpose_cb(const mavros_msgs::PositionTarget &msg)
 {
-  leaderPos_(0) = msg.position.x;
-  leaderPos_(1) = msg.position.y;
+  leaderPos_(0) = msg.position.x - init_x_; //in gazebo, the UAV origin is at the takeoff home postision
+  leaderPos_(1) = msg.position.y - init_y_;
   leaderPos_(2) = msg.position.z;
   leaderVel_(0) = msg.velocity.x;
   leaderVel_(1) = msg.velocity.y;
@@ -103,4 +147,15 @@ void uavCtrl::leaderpose_cb(const mavros_msgs::PositionTarget &msg)
   leaderAcc_(0) = msg.acceleration_or_force.x;
   leaderAcc_(1) = msg.acceleration_or_force.y;
   leaderAcc_(2) = msg.acceleration_or_force.z;
+}
+
+void uavCtrl::cmd_cb(const std_msgs::Int32 &msg)
+{
+	command_ = msg.data;
+	cout << "receive command: " << command_ << endl;
+}
+
+void uavCtrl::px4state_cb(const mavros_msgs::State &msg)
+{
+	px4_state_ = msg;
 }

@@ -11,10 +11,12 @@
         <!-- MAVROS and vehicle configs -->
         <arg name="ID" value="1"/>
         <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
+        <arg name="x_pos" value="1"/>
+        <arg name="y_pos" value="0"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="1"/>
-            <arg name="y" value="0"/>
+            <arg name="x" value="$(arg x_pos)"/>
+            <arg name="y" value="$(arg y_pos)"/>
             <arg name="z" value="0"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
@@ -38,15 +40,21 @@
     <arg name="altitude" default = "2.5"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
-    	  <param name="Kp_x" value = "1"/>
+        <param name="init_x" value = "$(arg x_pos)"/>
+        <param name="init_y" value = "$(arg y_pos)"/>
+    	<param name="Kp_x" value = "1"/>
         <param name="Kp_y" value = "1"/>
         <param name="Kv_x" value = "0.7"/>
         <param name="Kv_y" value = "0.7"/>
+        <param name="h_omega" value = "0.2"/>
+        <param name="h_radius" value = "2"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
         <param name="alpha" value = "0.5"/>
+        <param name="esm_x_init" value = "0.42"/>
+        <param name="esm_y_init" value = "-0.34"/>
         <param name="neighbor1_name" value = "ugv3"/>
     </node>
 </group>
@@ -56,9 +64,11 @@
         <arg name="ID" value="2"/>
         <arg name="fcu_url" default="udp://:14542@localhost:14582"/>
         <!-- PX4 SITL and vehicle spawn -->
+        <arg name="x_pos" value="-1"/>
+        <arg name="y_pos" value="0"/>
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
-            <arg name="x" value="-1"/>
-            <arg name="y" value="0"/>
+            <arg name="x" value="$(arg x_pos)"/>
+            <arg name="y" value="$(arg y_pos)"/>
             <arg name="z" value="0"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
@@ -82,15 +92,21 @@
     <arg name="altitude" default = "3"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
-    	  <param name="Kp_x" value = "1"/>
+        <param name="init_x" value = "$(arg x_pos)"/>
+        <param name="init_y" value = "$(arg y_pos)"/>
+    	<param name="Kp_x" value = "1"/>
         <param name="Kp_y" value = "1"/>
         <param name="Kv_x" value = "0.7"/>
         <param name="Kv_y" value = "0.7"/>
+        <param name="h_omega" value = "0.2"/>
+        <param name="h_radius" value = "3"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
         <param name="alpha" value = "0.5"/>
+        <param name="esm_x_init" value = "-0.38"/>
+        <param name="esm_y_init" value = "0.86"/>
         <param name="neighbor1_name" value = "ugv3"/>
     </node>
 </group>

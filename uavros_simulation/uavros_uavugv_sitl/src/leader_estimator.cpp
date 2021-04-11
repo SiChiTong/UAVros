@@ -20,8 +20,12 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   nh_private_.param<double>("shape_radius", shape_radius_, 1);
   nh_private_.param<double>("alt_sp", alt_sp, 2.5);
   nh_private_.param<double>("alpha", alpha_, 1); // coefficient of the distributed estimator
+  nh_private_.param<double>("esm_x_init", esm_x_init_, 0.0);
+  nh_private_.param<double>("esm_y_init", esm_y_init_, 0.0);
+  nh_private_.param<double>("virtual_leader_vx", l_vx_, 0.2);
+  nh_private_.param<double>("virtual_leader_vy", l_vy_, 0.2);
   nh_private_.param<int>("neighbor_num", ng_num_, 1); // number of neighbor, only support 1 now
-  nh_private_.param<string>("neighbor1_name", ng_name1_, "none");
+  nh_private_.param<string>("neighbor1_name", ng_name1_, "none"); //"virtual_leader" means it knows the state of leader
   nh_private_.param<string>("neighbor2_name", ng_name2_, "none");
 
   cout << "ng_num_: " << ng_num_ <<endl;
@@ -29,6 +33,7 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   cout << "alpha: " << alpha_ <<endl;
 
   ng_estimateSub1_ = nh_.subscribe("/"+ng_name1_+"/leader_pose_estimate", 1, &leaderEstimate::ng_estimate_cb1, this, ros::TransportHints().tcpNoDelay()); 
+  cmdSub_ = nh_.subscribe("/cmd", 1, &leaderEstimate::cmd_cb, this, ros::TransportHints().tcpNoDelay()); 
   leader_state_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("leader_pose_estimate", 10);
   leaderPath_pub_ = nh_.advertise<nav_msgs::Path>("trajectory/leader_traj", 1); //to rviz 
 
@@ -36,10 +41,11 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   trajloop_timer_ = nh_.createTimer(ros::Duration(0.1), &leaderEstimate::trajloop_cb, this);  // Define timer for constant loop rate  
 
 
-  leaderPos_ << 0.0, 0.0, 0.0;
+  leaderPos_ << esm_x_init_, esm_y_init_, 0.0;
   leaderVel_ << 0.0, 0.0, 0.0;
   leaderAcc_ << 0.0, 0.0, 0.0;
-  dt_ = 0.0; time_now_ = 0.0; time_last_ = 0.0;
+  dt_ = 0.0; time_now_ = 0.0; time_last_ = 0.0; start_time_ = 0.0; t_ = 0.0;
+  command_ = 0; start_flag_ = 0;
 
   A0_ << 0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 0.0, 0.0,
@@ -63,8 +69,31 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
   time_now_ = ros::Time::now().toSec();
   dt_ = time_now_ - time_last_;
   time_last_ = time_now_;
+
+  switch (command_)
+  {
+  case 0:
+    break;
+  case 1:
+    if (start_flag_ == 0)
+    {
+      start_time_ = ros::Time::now().toSec();
+    }
+    start_flag_ = 1;
+    t_ = ros::Time::now().toSec() - start_time_;
+    if (ng_name1_ == "virtual_leader")
+    {
+      y_hat1_(0) = l_vx_ * t_;
+      y_hat1_(1) = l_vy_ * t_;
+    }
+    distributed_estimator(dt_);
+    break; 
+  default:
+    cout << "error command!" << endl;
+    break;
+  }
+
   // shapeCreator(time_now_);  //publish a circle shaped leader pos
-  distributed_estimator(dt_);
   pubLeaderEstimation(leaderPos_, leaderVel_, leaderAcc_);
 }
 
@@ -85,7 +114,7 @@ void leaderEstimate::distributed_estimator(double dt)
     }
   else 
     {
-      // TODO: if neighbor_num ==0 or more than 1
+      // TODO: if neighbor_num == 0 or more than 1
     }
   q_hat_ = q_hat_last_ + dq_hat * dt; //renew q_hat_ 
   q_hat_last_ = q_hat_;
@@ -155,4 +184,10 @@ void leaderEstimate::ng_estimate_cb1(const mavros_msgs::PositionTarget &msg)
 { // only get neighbor's estimation of leader's posXY by communication
   y_hat1_(0) = msg.position.x;
   y_hat1_(1) = msg.position.y;
+}
+
+void leaderEstimate::cmd_cb(const std_msgs::Int32 &msg)
+{
+	command_ = msg.data;
+	cout << "receive command: " << command_ << endl;
 }

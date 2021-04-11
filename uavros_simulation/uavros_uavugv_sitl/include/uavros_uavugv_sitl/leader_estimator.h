@@ -23,6 +23,7 @@
 #include <mavros_msgs/PositionTarget.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <std_msgs/Int32.h>
 
 
 using namespace std;
@@ -34,6 +35,7 @@ class leaderEstimate
     ros::NodeHandle nh_;
     ros::NodeHandle nh_private_;
     ros::Subscriber ng_estimateSub1_;
+    ros::Subscriber cmdSub_;
     ros::Publisher leader_state_pub_;   
     ros::Publisher leaderPath_pub_; 
     ros::Timer cmdloop_timer_;
@@ -48,10 +50,13 @@ class leaderEstimate
     Eigen::Matrix<double,4,2> KP_; // gain matrix of the distributed estimator
 
     double shape_omega_, shape_radius_;
-    double dt_, time_now_, time_last_;
+    double dt_, time_now_, time_last_, start_time_, t_;
     double alt_sp, alpha_;
+    double esm_x_init_, esm_y_init_;
+    double l_vx_, l_vy_;
     string ng_name1_, ng_name2_;
     int ng_num_;
+    int command_, start_flag_;
     geometry_msgs::PoseStamped trajPoseStamped[70]; //rviz Path: last few seconds, 0.1s/point
 
     void cmdloop_cb(const ros::TimerEvent &event);
@@ -61,6 +66,7 @@ class leaderEstimate
     void pubTrajectory();
     void distributed_estimator(double dt);
     void ng_estimate_cb1(const mavros_msgs::PositionTarget &msg);
+    void cmd_cb(const std_msgs::Int32 &msg);
 
   public:
     leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private);
