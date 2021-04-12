@@ -147,6 +147,10 @@ add_executable(leader_estimator_node
                   src/leader_estimator_node.cpp
                   src/leader_estimator.cpp)
 
+add_executable(ackerman_controller_node 
+                  src/ackerman_controller_node.cpp
+                  src/ackerman_controller.cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -160,6 +164,7 @@ add_executable(leader_estimator_node
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_controller_node ${catkin_LIBRARIES})
 target_link_libraries(leader_estimator_node ${catkin_LIBRARIES})
+target_link_libraries(ackerman_controller_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##

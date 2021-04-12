@@ -39,6 +39,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   nh_private_.param<double>("init_y", init_y_, 0);
   nh_private_.param<double>("h_omega", h_omega_, 0);
   nh_private_.param<double>("h_radius", h_radius_, 0);
+  nh_private_.param<double>("h_phi", h_phi_, 0.0);
 
   Kpos_ << Kpos_x_, Kpos_y_, Kpos_z_;
   Kvel_ << Kvel_x_, Kvel_y_, Kvel_z_;
@@ -63,6 +64,7 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   switch (command_)
   {
   case 0:
+    acc_sp << 0.0, 0.0, 0.0;
     break;
   case 1:
     if (start_flag_ == 0)
@@ -78,12 +80,12 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     t_ = ros::Time::now().toSec() - start_time_;
     double theta;
     theta = h_omega_ * t_;
-    hPos_(0) = h_radius_ * cos(theta);
-    hPos_(1) = h_radius_ * sin(theta);
-    hVel_(0) = - h_radius_ * h_omega_* sin(theta);
-    hVel_(1) = h_radius_ * h_omega_* cos(theta);
-    hAcc_(0) = - h_radius_ * h_omega_* h_omega_ * cos(theta);
-    hAcc_(1) = - h_radius_ * h_omega_* h_omega_ * sin(theta);
+    hPos_(0) = h_radius_ * cos(theta + h_phi_);
+    hPos_(1) = h_radius_ * sin(theta + h_phi_);
+    hVel_(0) = - h_radius_ * h_omega_* sin(theta + h_phi_);
+    hVel_(1) = h_radius_ * h_omega_* cos(theta + h_phi_);
+    hAcc_(0) = - h_radius_ * h_omega_* h_omega_ * cos(theta + h_phi_);
+    hAcc_(1) = - h_radius_ * h_omega_* h_omega_ * sin(theta + h_phi_);
 
     computeAccCmd(acc_sp, leaderPos_ + hPos_, leaderVel_ + hVel_, leaderAcc_ + hAcc_); 
     //compute acceleration setpoint command by PD controller algorithm;  

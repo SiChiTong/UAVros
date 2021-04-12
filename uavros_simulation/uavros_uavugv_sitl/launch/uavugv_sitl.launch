@@ -11,8 +11,8 @@
         <!-- MAVROS and vehicle configs -->
         <arg name="ID" value="1"/>
         <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
-        <arg name="x_pos" value="1"/>
-        <arg name="y_pos" value="0"/>
+        <arg name="x_pos" value="0"/>
+        <arg name="y_pos" value="1"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
             <arg name="x" value="$(arg x_pos)"/>
@@ -44,10 +44,11 @@
         <param name="init_y" value = "$(arg y_pos)"/>
     	<param name="Kp_x" value = "1"/>
         <param name="Kp_y" value = "1"/>
-        <param name="Kv_x" value = "0.7"/>
-        <param name="Kv_y" value = "0.7"/>
-        <param name="h_omega" value = "0.2"/>
-        <param name="h_radius" value = "2"/>
+        <param name="Kv_x" value = "1"/>
+        <param name="Kv_y" value = "1"/>
+        <param name="h_omega" value = "1"/>
+        <param name="h_radius" value = "1.5"/>
+        <param name="h_phi" value = "0.0"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
@@ -64,8 +65,8 @@
         <arg name="ID" value="2"/>
         <arg name="fcu_url" default="udp://:14542@localhost:14582"/>
         <!-- PX4 SITL and vehicle spawn -->
-        <arg name="x_pos" value="-1"/>
-        <arg name="y_pos" value="0"/>
+        <arg name="x_pos" value="-2"/>
+        <arg name="y_pos" value="1"/>
         <include file="$(find px4)/launch/single_vehicle_spawn.launch">
             <arg name="x" value="$(arg x_pos)"/>
             <arg name="y" value="$(arg y_pos)"/>
@@ -89,17 +90,18 @@
             <arg name="tgt_component" value="1"/>
         </include>
 
-    <arg name="altitude" default = "3"/>
+    <arg name="altitude" default = "2.7"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
         <param name="init_x" value = "$(arg x_pos)"/>
         <param name="init_y" value = "$(arg y_pos)"/>
     	<param name="Kp_x" value = "1"/>
         <param name="Kp_y" value = "1"/>
-        <param name="Kv_x" value = "0.7"/>
-        <param name="Kv_y" value = "0.7"/>
-        <param name="h_omega" value = "0.2"/>
-        <param name="h_radius" value = "3"/>
+        <param name="Kv_x" value = "1"/>
+        <param name="Kv_y" value = "1"/>
+        <param name="h_omega" value = "1"/>
+        <param name="h_radius" value = "2"/>
+        <param name="h_phi" value = "3.1415"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
@@ -114,8 +116,8 @@
 
 <group ns="ugv3">
 	<arg name="ID" value="3"/>
-	<arg name="x_pos" default="0"/>
-	<arg name="y_pos" default="0"/>
+	<arg name="x_pos" default="-1"/>
+	<arg name="y_pos" default="1"/>
 	<arg name="z_pos" default="0"/>
 	<arg name="yaw" default="0"/>
 	<!-- 在gazebo中加载机器人模型-->
@@ -148,9 +150,19 @@
         <param name="esm_x_init" value = "0.49"/>
         <param name="esm_y_init" value = "0.58"/>
         <param name="neighbor1_name" value = "virtual_leader"/>
-        <param name="virtual_leader_vx" value = "0.2"/>
-        <param name="virtual_leader_vy" value = "0.2"/>
+        <param name="virtual_leader_vx" value = "0.1"/>
+        <param name="virtual_leader_vy" value = "0.1"/>
     </node>
+
+    <node pkg="uavros_uavugv_sitl" type="ackerman_controller_node" name="ackerman_controller" output="screen">
+        <param name="v_max" value = "1"/>
+        <param name="steering_max_rad" value = "0.35"/>
+    	<param name="Kp_x" value = "0.5"/>
+        <param name="Kp_y" value = "0.5"/>
+        <param name="Kp_heading" value = "1.0"/>
+        <param name="init_phi" value = "$(arg yaw)"/>
+        <param name="wheelbase" value = "0.335"/>
+    </node>	
 
 </group>
 

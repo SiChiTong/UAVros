@@ -57,9 +57,9 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
         0.0, 1.732,
         0.0, 1; // gain matrix of the distributed estimator
   // column vector by default      
-  q_hat_ << 0.0, 0.0, 0.0, 0.0; //estimation of leader state, [px;vx;py;vy]
+  q_hat_ << esm_x_init_, 0.0, esm_y_init_, 0.0; //estimation of leader state, [px;vx;py;vy]
   //TODO: q_hat_ should be the current pos of the uav in the beginning!
-  q_hat_last_ << 0.0, 0.0, 0.0, 0.0; //estimation of leader state in the last loop, pos and vel
+  q_hat_last_ << esm_x_init_, 0.0, esm_y_init_, 0.0; //estimation of leader state in the last loop, pos and vel
   y_hat1_ << 0.0, 0.0; //neighbor_1's estimation of leader output, pos [px;py]
   y_hat2_ << 0.0, 0.0; //neighbor_2's estimation of leader output, pos
 }

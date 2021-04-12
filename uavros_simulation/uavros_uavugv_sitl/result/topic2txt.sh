@@ -1,0 +1,11 @@
+rostopic echo -b 2021-04-12-15-53-09.bag -p /cmd > cmd.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /uav1/leader_pose_estimate > uav1_leader_pose_estimate.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /uav1/mavros/local_position/pose > uav1_pose.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /uav1/mavros/setpoint_raw/local > uav1_setpoint.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /uav2/leader_pose_estimate > uav2_leader_pose_estimate.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /uav2/mavros/local_position/pose > uav2_pose.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /uav2/mavros/setpoint_raw/local > uav2_setpoint.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /ugv3/leader_pose_estimate > ugv3_leader_pose_estimate.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /ugv3/ackermann_cmd_mux/output > ugv3_setpoint.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /ugv3/odom > ugv3_odom.txt
+rostopic echo -b 2021-04-12-15-53-09.bag -p /clock > clock.txt

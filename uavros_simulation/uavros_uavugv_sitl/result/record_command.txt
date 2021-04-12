@@ -1,0 +1,1 @@
+rosbag record /cmd /uav1/leader_pose_estimate /uav1/mavros/local_position/pose /uav1/mavros/setpoint_raw/local /uav2/leader_pose_estimate /uav2/mavros/local_position/pose /uav2/mavros/setpoint_raw/local /ugv3/leader_pose_estimate /ugv3/ackermann_cmd_mux/output /ugv3/odom /clock

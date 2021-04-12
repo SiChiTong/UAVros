@@ -56,7 +56,7 @@ class uavCtrl
     double Kpos_x_, Kpos_y_, Kpos_z_, Kvel_x_, Kvel_y_, Kvel_z_;
     double init_x_, init_y_;
     double start_time_, t_;
-    double h_omega_, h_radius_;
+    double h_omega_, h_radius_, h_phi_;
     int command_, start_flag_;
     mavros_msgs::State px4_state_;
     mavros_msgs::SetMode mode_cmd_;
