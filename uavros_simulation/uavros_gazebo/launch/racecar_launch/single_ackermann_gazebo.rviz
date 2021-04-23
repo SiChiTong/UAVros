@@ -7,8 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Odometry1/Shape1
-        - /TF1/Status1
-        - /TF1/Tree1/map1
       Splitter Ratio: 0.6227545142173767
     Tree Height: 826
   - Class: rviz/Selection
@@ -73,7 +71,7 @@ Visualization Manager:
           Value: true
         Value: false
       Enabled: true
-      Keep: 50
+      Keep: 100
       Name: Odometry
       Position Tolerance: 0.10000000149011612
       Shape:
@@ -137,25 +135,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 23.96774673461914
+      Distance: 26.19735336303711
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.2959083318710327
-        Y: -0.42718759179115295
-        Z: -3.2735466957092285
+        X: -0.3833356201648712
+        Y: 1.3216408491134644
+        Z: -1.8912744522094727
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.089796781539917
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.5003967881202698
+      Yaw: 1.5803958177566528
     Saved: ~
 Window Geometry:
   Displays:
@@ -173,5 +171,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1963
-  X: 317
-  Y: 502
+  X: 1347
+  Y: 662

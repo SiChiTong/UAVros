@@ -1,10 +1,11 @@
 <launch>
 
   <arg name="world_path" default="$(find uavros_gazebo)/worlds/lawn.world" />
+  <!--arg name="world_name" default="worlds/empty.world"/--> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
   <arg name="vehicle" default="iris" />
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<!--arg name="world_name" value="$(arg world_path)"/-->
+		<arg name="world_name" value="$(arg world_path)"/>
 	</include>
 
 <group ns="ugv3">
