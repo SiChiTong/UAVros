@@ -22,6 +22,7 @@ class OdometryNode:
     def __init__(self):
         # init internals
         self.last_received_pose = Pose()
+        self.last_received_pose.orientation.w = 1 #prevent invalid quaternion (spx)
         self.last_received_twist = Twist()
         self.last_recieved_stamp = None
 
@@ -48,7 +49,7 @@ class OdometryNode:
                 # Extract our current position information
                 self.last_received_pose = msg.pose[arrayIndex]
                 self.last_received_twist = msg.twist[arrayIndex]
-        else:
+        else: #spx
             try:
                 arrayIndex = msg.name.index('racecar'+str(self.ID)+'::base_footprint')
             except ValueError as e:

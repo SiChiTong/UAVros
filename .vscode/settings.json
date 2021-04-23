@@ -69,5 +69,6 @@
     "cSpell.words": [
         "mavros",
         "peixuan"
-    ]
+    ],
+    "cmake.configureOnOpen": false
 }
