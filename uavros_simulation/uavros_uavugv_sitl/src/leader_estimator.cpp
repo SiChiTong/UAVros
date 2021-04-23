@@ -25,6 +25,7 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   nh_private_.param<double>("virtual_leader_vx", l_vx_, 0.2);
   nh_private_.param<double>("virtual_leader_vy", l_vy_, 0.2);
   nh_private_.param<int>("neighbor_num", ng_num_, 1); // number of neighbor, only support 1 now
+  nh_private_.param<int>("rviz_path_length", trajpose_window_, 70); // length num of leaderPoseEstimate nav path in rviz
   nh_private_.param<string>("neighbor1_name", ng_name1_, "none"); //"virtual_leader" means it knows the state of leader
   nh_private_.param<string>("neighbor2_name", ng_name2_, "none");
 
@@ -156,28 +157,29 @@ void leaderEstimate::pubLeaderEstimation(const Eigen::Vector3d &state_pos, const
 
 void leaderEstimate::pubTrajectory()
 { //for rviz to display the path
-  nav_msgs::Path refTrajectory_;
-  int length = sizeof(trajPoseStamped) / sizeof(trajPoseStamped[0]);
+  nav_msgs::Path path_msg_;
+  geometry_msgs::PoseStamped TrajPose_;
+  TrajPose_.header.stamp = ros::Time::now();
+  TrajPose_.header.frame_id = "map";
+  TrajPose_.pose.orientation.w = 1.0;
+  TrajPose_.pose.orientation.x = 0.0;
+  TrajPose_.pose.orientation.y = 0.0;
+  TrajPose_.pose.orientation.z = 0.0;
+  TrajPose_.pose.position.x = leaderPos_(0);
+  TrajPose_.pose.position.y = leaderPos_(1);
+  TrajPose_.pose.position.z = alt_sp;  
 
-  for (int i = 0; i < length-1; i ++)
+  TrajPoseHistory_vector_.insert(TrajPoseHistory_vector_.begin(), TrajPose_);
+  if (TrajPoseHistory_vector_.size() > trajpose_window_)
   {
-    trajPoseStamped[i] = trajPoseStamped[i+1];
-    refTrajectory_.poses.push_back(trajPoseStamped[i]);
+    TrajPoseHistory_vector_.pop_back();
   }
-  trajPoseStamped[length-1].header.stamp = ros::Time::now();
-  trajPoseStamped[length-1].header.frame_id = "map";
-  trajPoseStamped[length-1].pose.orientation.w = 1.0;
-  trajPoseStamped[length-1].pose.orientation.x = 0.0;
-  trajPoseStamped[length-1].pose.orientation.y = 0.0;
-  trajPoseStamped[length-1].pose.orientation.z = 0.0;
-  trajPoseStamped[length-1].pose.position.x = leaderPos_(0);
-  trajPoseStamped[length-1].pose.position.y = leaderPos_(1);
-  trajPoseStamped[length-1].pose.position.z = alt_sp;
-  refTrajectory_.poses.push_back(trajPoseStamped[length-1]);
-  refTrajectory_.header.stamp = ros::Time::now();
-  refTrajectory_.header.frame_id = "map";
 
-  leaderPath_pub_.publish(refTrajectory_);
+  path_msg_.header.stamp = ros::Time::now();
+  path_msg_.header.frame_id = "map";
+  path_msg_.poses = TrajPoseHistory_vector_;
+
+  leaderPath_pub_.publish(path_msg_);
 }
 
 void leaderEstimate::ng_estimate_cb1(const mavros_msgs::PositionTarget &msg)

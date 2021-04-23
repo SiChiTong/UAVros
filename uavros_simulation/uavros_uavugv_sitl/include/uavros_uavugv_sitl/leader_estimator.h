@@ -57,7 +57,8 @@ class leaderEstimate
     string ng_name1_, ng_name2_;
     int ng_num_;
     int command_, start_flag_;
-    geometry_msgs::PoseStamped trajPoseStamped[70]; //rviz Path: last few seconds, 0.1s/point
+    int trajpose_window_;
+    std::vector<geometry_msgs::PoseStamped> TrajPoseHistory_vector_;
 
     void cmdloop_cb(const ros::TimerEvent &event);
     void trajloop_cb(const ros::TimerEvent &event);

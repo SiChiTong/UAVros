@@ -4,7 +4,7 @@
   <arg name="vehicle" default="iris" />
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<!--arg name="world_name" value="$(arg world_path)"/-->
+		<arg name="world_name" value="$(arg world_path)"/>
 	</include>
 
 <group ns="uav1">
@@ -167,7 +167,7 @@
 </group>
 
 
-  <arg name="visualization" default="false"/>
+  <arg name="visualization" default="true"/>
   <group if="$(arg visualization)">
       <node type="rviz" name="rviz" pkg="rviz" args="-d /home/spx/UAVros/uavros_simulation/uavros_uavugv_sitl/config/rviz_uavugv.rviz" />
   </group>
