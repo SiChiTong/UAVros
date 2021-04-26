@@ -9,7 +9,7 @@
  */
 
 
-#include "uavros_uavugv_sitl/uav_controller.h"
+#include "uav_controller.h"
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "uav_controller");

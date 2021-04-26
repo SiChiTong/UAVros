@@ -8,7 +8,7 @@
  * First built on 2021.04.12
  */
 
-#include "uavros_uavugv_sitl/ackerman_controller.h"
+#include "ackerman_controller.h"
 
 using namespace Eigen;
 using namespace std;

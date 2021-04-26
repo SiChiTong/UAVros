@@ -9,7 +9,7 @@
  */
 
 
-#include "uavros_uavugv_sitl/ackerman_controller.h"
+#include "ackerman_controller.h"
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "ackerman_controller");

@@ -8,7 +8,7 @@
  * First built on 2021.04.02
  */
 
-#include "uavros_uavugv_sitl/uav_controller.h"
+#include "uav_controller.h"
 
 using namespace Eigen;
 using namespace std;
