@@ -172,4 +172,9 @@
       <node type="rviz" name="rviz" pkg="rviz" args="-d /home/spx/UAVros/uavros_simulation/uavros_uavugv_sitl/config/rviz_uavugv.rviz" />
   </group>
 
+  <arg name="plot" default="true"/>
+  <group if="$(arg plot)">
+      <node type="plotjuggler" name="plotjuggler" pkg="plotjuggler"/>
+  </group>
+
 </launch>
