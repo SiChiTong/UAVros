@@ -3,6 +3,7 @@ catkin_make --source uavros_msgs --build build/uavros_msgs
 catkin_make --source Prometheus_control/control --build build/prometheus_control
 catkin_make --source uavros_simulation/uavros_gazebo --build build/uavros_gazebo
 catkin_make --source uavros_experiment/ARtagLanding --build build/uavros_artaglanding
+catkin_make --source uavros_experiment/uavros_uavugv --build build/uavros_uavugv
 catkin_make --source uavros_simulation/kcffollow_simulation --build build/uavros_kcffollow_simulation
 catkin_make --source uavros_simulation/uavros_uavugv_sitl --build build/uavros_uavugv_sitl
 
