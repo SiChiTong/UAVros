@@ -26,14 +26,18 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   nh_private_.param<double>("virtual_leader_vy", l_vy_, 0.2);
   nh_private_.param<int>("neighbor_num", ng_num_, 1); // number of neighbor, only support 1 now
   nh_private_.param<int>("rviz_path_length", trajpose_window_, 70); // length num of leaderPoseEstimate nav path in rviz
-  nh_private_.param<string>("neighbor1_name", ng_name1_, "none"); //"virtual_leader" means it knows the state of leader
+  nh_private_.param<string>("neighbor1_name", ng_name1_, "none"); //"virtual_leader**" means it knows the state of leader
   nh_private_.param<string>("neighbor2_name", ng_name2_, "none");
 
   cout << "ng_num_: " << ng_num_ <<endl;
   cout << "ng_name1_: " << ng_name1_ <<endl;
   cout << "alpha: " << alpha_ <<endl;
 
-  ng_estimateSub1_ = nh_.subscribe("/"+ng_name1_+"/leader_pose_estimate", 1, &leaderEstimate::ng_estimate_cb1, this, ros::TransportHints().tcpNoDelay()); 
+  if((ng_name1_ != "virtual_leader_line") && (ng_name1_ != "virtual_leader_circle"))
+  {
+    ng_estimateSub1_ = nh_.subscribe("/"+ng_name1_+"/leader_pose_estimate", 1, &leaderEstimate::ng_estimate_cb1, 
+                                                                    this, ros::TransportHints().tcpNoDelay()); 
+  }
   cmdSub_ = nh_.subscribe("/cmd", 1, &leaderEstimate::cmd_cb, this, ros::TransportHints().tcpNoDelay()); 
   leader_state_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("leader_pose_estimate", 10);
   leaderPath_pub_ = nh_.advertise<nav_msgs::Path>("trajectory/leader_traj", 1); //to rviz 
@@ -75,6 +79,7 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
   {
   case 0:
     break;
+
   case 1:
     if (start_flag_ == 0)
     {
@@ -82,13 +87,21 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
     }
     start_flag_ = 1;
     t_ = ros::Time::now().toSec() - start_time_;
-    if (ng_name1_ == "virtual_leader")
-    {
-      y_hat1_(0) = l_vx_ * t_;
-      y_hat1_(1) = l_vy_ * t_;
+    if (ng_name1_ == "virtual_leader_circle")
+    {//generate circle leader pose directly,not from estimator
+      circleCreator(t_);
     }
-    distributed_estimator(dt_);
+    else
+    {
+      if (ng_name1_ == "virtual_leader_line")
+      {
+        y_hat1_(0) = l_vx_ * t_;
+        y_hat1_(1) = l_vy_ * t_;
+      }
+      distributed_estimator(dt_);
+    }
     break; 
+
   default:
     cout << "error command!" << endl;
     break;
@@ -127,7 +140,7 @@ void leaderEstimate::distributed_estimator(double dt)
   leaderAcc_(1) = (A0_*q_hat_)(3);  
 }
 
-void leaderEstimate::shapeCreator(double t)
+void leaderEstimate::circleCreator(double t)
 { //circle creator
   double theta;
   theta = shape_omega_ * t;

@@ -62,7 +62,7 @@ class leaderEstimate
 
     void cmdloop_cb(const ros::TimerEvent &event);
     void trajloop_cb(const ros::TimerEvent &event);
-    void shapeCreator(double t);
+    void circleCreator(double t);
     void pubLeaderEstimation(const Eigen::Vector3d &state_pos, const Eigen::Vector3d &state_vel, const Eigen::Vector3d &state_acc);
     void pubTrajectory();
     void distributed_estimator(double dt);
