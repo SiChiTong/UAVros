@@ -49,8 +49,9 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   leaderPos_ << esm_x_init_, esm_y_init_, 0.0;
   leaderVel_ << 0.0, 0.0, 0.0;
   leaderAcc_ << 0.0, 0.0, 0.0;
-  dt_ = 0.0; time_now_ = 0.0; time_last_ = 0.0; start_time_ = 0.0; t_ = 0.0;
-  command_ = 0; start_flag_ = 0;
+  dt_ = 0.0; time_now_ = 0.0; time_last_ = 0.0; 
+  t1_start_ = 0.0; t1_accum_ = 0.0; t_ = 0.0;
+  command_ = 0; state_num_ = 0;
 
   A0_ << 0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 0.0, 0.0,
@@ -77,16 +78,22 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
 
   switch (command_)
   {
-  case 0:
+  case 0: //waiting and suspending
+    if (state_num_ == 1)
+    {//if change mode from 1, latch the t_ to t1_accum_(accumulate)
+      t1_accum_ = t_;
+    }
+    state_num_ = 0;
     break;
 
   case 1:
-    if (start_flag_ == 0)
-    {
-      start_time_ = ros::Time::now().toSec();
+    if (state_num_ == 0)
+    {//record the time when case 1 start from case 0
+      t1_start_ = ros::Time::now().toSec();
     }
-    start_flag_ = 1;
-    t_ = ros::Time::now().toSec() - start_time_;
+    state_num_ = 1;
+    t_ = ros::Time::now().toSec() - t1_start_ + t1_accum_;
+    //t_ is the total time in case 1 despite several case switches
     if (ng_name1_ == "virtual_leader_circle")
     {//generate circle leader pose directly,not from estimator
       circleCreator(t_);
@@ -107,13 +114,12 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
     break;
   }
 
-  // shapeCreator(time_now_);  //publish a circle shaped leader pos
   pubLeaderEstimation(leaderPos_, leaderVel_, leaderAcc_);
 }
 
 void leaderEstimate::trajloop_cb(const ros::TimerEvent &event)
 {
-  pubTrajectory();
+  pubTrajectory();// to rviz
 }
 
 void leaderEstimate::distributed_estimator(double dt)

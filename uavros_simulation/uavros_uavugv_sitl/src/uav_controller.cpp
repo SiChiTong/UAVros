@@ -50,12 +50,13 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   leaderVel_ << 0.0, 0.0, 0.0;
   leaderAcc_ << 0.0, 0.0, 0.0; 
   acc_sp << 0.0, 0.0, 0.0;
+  VxyPz_sp << 0.0, 0.0, alt_sp;
   hPos_ << 0.0, 0.0, 0.0;
   hVel_ << 0.0, 0.0, 0.0;
   hAcc_ << 0.0, 0.0, 0.0;
   command_ = 0;
-  start_flag_ = 0;
-  start_time_ = 0;
+  state_num_ = 0;
+  t1_start_ = 0;
 
 }
 
@@ -63,21 +64,27 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
 {
   switch (command_)
   {
-  case 0:
-    acc_sp << 0.0, 0.0, 0.0;
+  case 0: //waiting and suspending
+    if (state_num_ == 1)
+    {//if change mode from 1, latch the t_ to t1_accum_(accumulate)
+      t1_accum_ = t_;
+    }
+    state_num_ = 0;
+    VxyPz_sp << 0.0, 0.0, alt_sp;
+    pubVxyPzCmd(VxyPz_sp);
     break;
   case 1:
-    if (start_flag_ == 0)
+    if (state_num_ == 0)
     {
-      start_time_ = ros::Time::now().toSec();
+      t1_start_ = ros::Time::now().toSec();
     }
-    start_flag_ = 1;
+    state_num_ = 1;
     if (px4_state_.mode != "OFFBOARD")
     {
         mode_cmd_.request.custom_mode = "OFFBOARD";
 				setMode_client_.call(mode_cmd_);
     }
-    t_ = ros::Time::now().toSec() - start_time_;
+    t_ = ros::Time::now().toSec() - t1_start_ + t1_accum_;
     double theta;
     theta = h_omega_ * t_;
     hPos_(0) = h_radius_ * cos(theta + h_phi_);
@@ -89,13 +96,12 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
 
     computeAccCmd(acc_sp, leaderPos_ + hPos_, leaderVel_ + hVel_, leaderAcc_ + hAcc_); 
     //compute acceleration setpoint command by PD controller algorithm;  
+    pubAccCmd(acc_sp);
     break; 
   default:
     cout << "error command!" << endl;
     break;
   }
-
-  pubAccCmd(acc_sp);
 }
 
 void uavCtrl::computeAccCmd(Eigen::Vector3d &acc_cmd, const Eigen::Vector3d &target_pos,
@@ -117,6 +123,19 @@ void uavCtrl::pubAccCmd(const Eigen::Vector3d &cmd_acc)
   msg.acceleration_or_force.x = cmd_acc(0); //pub ax
   msg.acceleration_or_force.y = cmd_acc(1); //pub ay
   msg.acceleration_or_force.z = 0; //az feedforward = 0
+  target_pose_pub_.publish(msg);
+}
+
+void uavCtrl::pubVxyPzCmd(const Eigen::Vector3d &cmd_sp)
+{
+  mavros_msgs::PositionTarget msg;
+  msg.header.stamp = ros::Time::now();
+  msg.coordinate_frame = 1; //pub in ENU local frame;
+  msg.type_mask = 0b110111000011; // pub vx+vy+vz+pz, vz is feedforward vel. Ignore yaw and yaw rate
+  msg.velocity.x = cmd_sp(0); //pub vx
+  msg.velocity.y = cmd_sp(1); //pub vy
+  msg.velocity.z = 0; //pub vz
+  msg.position.z = cmd_sp(2); // pub local z altitude setpoint
   target_pose_pub_.publish(msg);
 }
 

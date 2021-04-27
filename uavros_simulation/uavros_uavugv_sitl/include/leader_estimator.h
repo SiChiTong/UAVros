@@ -50,13 +50,13 @@ class leaderEstimate
     Eigen::Matrix<double,4,2> KP_; // gain matrix of the distributed estimator
 
     double shape_omega_, shape_radius_;
-    double dt_, time_now_, time_last_, start_time_, t_;
+    double dt_, time_now_, time_last_, t1_start_, t1_accum_, t_;
     double alt_sp, alpha_;
     double esm_x_init_, esm_y_init_;
     double l_vx_, l_vy_;
     string ng_name1_, ng_name2_;
     int ng_num_;
-    int command_, start_flag_;
+    int command_, state_num_;
     int trajpose_window_;
     std::vector<geometry_msgs::PoseStamped> TrajPoseHistory_vector_;
 
