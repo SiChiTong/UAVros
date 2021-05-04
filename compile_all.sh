@@ -6,6 +6,7 @@ catkin_make --source uavros_experiment/ARtagLanding --build build/uavros_artagla
 catkin_make --source uavros_experiment/uavros_uavugv --build build/uavros_uavugv
 catkin_make --source uavros_simulation/kcffollow_simulation --build build/uavros_kcffollow_simulation
 catkin_make --source uavros_simulation/uavros_uavugv_sitl --build build/uavros_uavugv_sitl
+catkin_make --source uavros_simulation/ARtagLanding_sitl --build build/uavros_artaglanding_sitl
 
 #to be modified
 #catkin_make --source Modules/object_detection --build build/object_detection
