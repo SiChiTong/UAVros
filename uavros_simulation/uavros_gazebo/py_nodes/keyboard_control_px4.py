@@ -174,8 +174,8 @@ if __name__=="__main__":
 	while(1):
 		key= getKey()
 		command_control()
-		action_control()
-		local_target_pub.publish(cur_target_rc_yaw)
+		#action_control() #comment out by spx
+		#local_target_pub.publish(cur_target_rc_yaw) #comment out by spx
 		if (key == '\x03'):
 			break
 #		rospy.spin()

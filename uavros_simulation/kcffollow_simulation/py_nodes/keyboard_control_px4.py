@@ -45,13 +45,12 @@ command_cotrol
 3 : LAND
 4 : POSCTL
 5 : ATTITCTL
-6 : MISSION
 ---------------------------
 
 CTRL-C to quit
 
 """
-speed_control = 1600
+speed_control = 1600;
 cur_target_rc_yaw = OverrideRCIn()
 mavros_state = State()
 armServer = rospy.ServiceProxy('/mavros/cmd/arming', CommandBool)
@@ -118,11 +117,6 @@ def command_control():
 			print("Vehicle stabilized succeed!")
 		else:
 			print("Vehicle stabilized failed!")
-	elif key == '6':
-		if setModeServer(custom_mode='AUTO.MISSION'):
-			print("Vehicle mission succeed!")
-		else:
-			print("Vehicle mission failed!")
 
 def action_control():
 	global speed_control
@@ -180,8 +174,8 @@ if __name__=="__main__":
 	while(1):
 		key= getKey()
 		command_control()
-		action_control()
-		local_target_pub.publish(cur_target_rc_yaw)
+		#action_control() #comment out by spx
+		#local_target_pub.publish(cur_target_rc_yaw) #comment out by spx
 		if (key == '\x03'):
 			break
 #		rospy.spin()
