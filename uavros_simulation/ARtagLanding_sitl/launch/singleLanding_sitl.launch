@@ -1,0 +1,84 @@
+<launch>
+
+  <arg name="world_path" default="$(find uavros_gazebo)/worlds/precision_landing.world" />
+  <arg name="vehicle" default="iris" />
+  <arg name="sdf" default="$(find uavros_gazebo)/models/iris_usb_camera_down/iris_usb_camera_down.sdf"/>
+  <!--arg name="sdf" default="$(find mavlink_sitl_gazebo)/models/iris/iris.sdf"/-->
+
+
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(arg world_path)"/>
+	</include>
+
+<arg name="ns0" value="uav0"/>
+<arg name="ns1" value="uav1"/>
+
+<group ns="$(arg ns0)">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="ID" value="0"/>
+        <arg name="fcu_url" default="udp://:14540@localhost:14580"/>
+        <arg name="x_pos" value="1"/>
+        <arg name="y_pos" value="0"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
+            <arg name="x" value="$(arg x_pos)"/>
+            <arg name="y" value="$(arg y_pos)"/>
+            <arg name="z" value="0"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
+            <arg name="camNamespace" value="$(arg ns0)"/> <!--add by spx-->
+            <arg name="mavlink_udp_port" value="14560"/>
+            <arg name="mavlink_tcp_port" value="4560"/>
+            <arg name="ID" value="$(arg ID)"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+</group>
+
+<group ns="$(arg ns1)">
+        <!-- MAVROS and vehicle configs -->
+        <arg name="ID" value="1"/>
+        <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
+        <arg name="x_pos" value="2"/>
+        <arg name="y_pos" value="0"/>
+        <!-- PX4 SITL and vehicle spawn -->
+        <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
+            <arg name="x" value="$(arg x_pos)"/>
+            <arg name="y" value="$(arg y_pos)"/>
+            <arg name="z" value="0"/>
+            <arg name="R" value="0"/>
+            <arg name="P" value="0"/>
+            <arg name="Y" value="0"/>
+            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
+            <arg name="camNamespace" value="$(arg ns1)"/> <!--add by spx-->
+            <arg name="mavlink_udp_port" value="14561"/>
+            <arg name="mavlink_tcp_port" value="4561"/>
+            <arg name="ID" value="$(arg ID)"/>
+        </include>
+        <!-- MAVROS -->
+        <include file="$(find mavros)/launch/px4.launch">
+            <arg name="fcu_url" value="$(arg fcu_url)"/>
+            <arg name="gcs_url" value=""/>
+            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
+            <arg name="tgt_component" value="1"/>
+        </include>
+</group>
+
+
+
+  <arg name="visualization" default="false"/>
+  <group if="$(arg visualization)">
+      <node type="rviz" name="rviz" pkg="rviz" args="-d $(find uavros_artaglanding_sitl)/config/rviz_single.rviz" />
+  </group>
+
+
+</launch>

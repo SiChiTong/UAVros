@@ -9,3 +9,5 @@ sudo apt install ros-melodic-effort-controllers
 (racecar)
 
 ackermann_msgs (racecar)
+
+sudo apt install xmlstarlet (uavros_gazebo打开多个模型用）

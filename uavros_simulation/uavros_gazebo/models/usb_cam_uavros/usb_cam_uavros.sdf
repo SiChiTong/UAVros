@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <!--参考http://gazebosim.org/tutorials/?tut=ros_depth_camera -->
 <sdf version="1.5">
-  <model name="depth_camera_new">
+  <model name="usb_cam_uavros">
     <pose>0 0 0.035 0 0 0</pose>
     <link name="link">
       <inertial>
@@ -20,7 +20,7 @@
         <pose>0 0 0 0 1.57 0</pose>
         <geometry>
           <mesh>
-            <uri>model://depth_camera_new/meshes/hokuyo.dae</uri>
+            <uri>model://usb_cam_uavros/meshes/hokuyo.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -61,12 +61,13 @@
         </camera>
         <plugin filename="libgazebo_ros_openni_kinect.so" name="camera_controller">
           <baseline>0.2</baseline>
-          <cameraName>camera</cameraName>
+          <robotNamespace></robotNamespace> <!--add by spx, default is the robot model name-->
+          <cameraName>usb_cam</cameraName> <!--camera-->
           <alwaysOn>true</alwaysOn>
           <updateRate>20</updateRate>
           <pointCloudCutoff>0.05</pointCloudCutoff>
-          <imageTopicName>rgb/image_raw</imageTopicName>
-          <cameraInfoTopicName>rgb/camera_info</cameraInfoTopicName>
+          <imageTopicName>image_raw</imageTopicName> <!--rgb/image_raw-->
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName> <!--rgb/camera_info-->
           <depthImageTopicName>depth/image_raw</depthImageTopicName>
           <depthImageCameraInfoTopicName>depth/camera_info</depthImageCameraInfoTopicName>
           <pointCloudTopicName>depth/points</pointCloudTopicName>
