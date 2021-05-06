@@ -1,6 +1,7 @@
 <sdf version='1.6'>
   <model name='iris_usb_camera_down'>
 
+<!--the camera is changed from depth camera model in PX4-->
   <model name="usb_cam_uavros">
     <pose>0.08 0 -0.01 0 1.5708 0</pose>
     <link name="link">
@@ -20,7 +21,7 @@
         <pose>0 0 0 0 1.57 0</pose>
         <geometry>
           <mesh>
-            <uri>model://usb_cam_uavros/meshes/hokuyo.dae</uri>
+            <uri>model://iris_usb_camera_down/meshes/hokuyo.dae</uri>
           </mesh>
         </geometry>
       </visual>
@@ -138,7 +139,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://iris/meshes/iris.stl</uri>
+            <uri>model://iris_usb_camera_down/meshes/iris.stl</uri>
           </mesh>
         </geometry>
         <material>
@@ -220,7 +221,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://iris/meshes/iris_prop_ccw.dae</uri>
+            <uri>model://iris_usb_camera_down/meshes/iris_prop_ccw.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -285,7 +286,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://iris/meshes/iris_prop_ccw.dae</uri>
+            <uri>model://iris_usb_camera_down/meshes/iris_prop_ccw.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -350,7 +351,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://iris/meshes/iris_prop_cw.dae</uri>
+            <uri>model://iris_usb_camera_down/meshes/iris_prop_cw.dae</uri>
           </mesh>
         </geometry>
         <material>
@@ -415,7 +416,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://iris/meshes/iris_prop_cw.dae</uri>
+            <uri>model://iris_usb_camera_down/meshes/iris_prop_cw.dae</uri>
           </mesh>
         </geometry>
         <material>
