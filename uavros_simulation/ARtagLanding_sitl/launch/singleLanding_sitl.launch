@@ -17,8 +17,8 @@
         <!-- MAVROS and vehicle configs -->
         <arg name="ID" value="0"/>
         <arg name="fcu_url" default="udp://:14540@localhost:14580"/>
-        <arg name="x_pos" value="1"/>
-        <arg name="y_pos" value="0"/>
+        <arg name="x_pos" value="2"/>
+        <arg name="y_pos" value="0.5"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
             <arg name="x" value="$(arg x_pos)"/>
@@ -41,37 +41,42 @@
             <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
             <arg name="tgt_component" value="1"/>
         </include>
+
+  <arg name="smallMarker_size" value="5.3"/> <!--cm-->
+  <arg name="bigMarker_size" value="17.5"/> <!--cm-->
+
+	<include file="$(find uavros_artaglanding_sitl)/launch/ar_track_camera_sitl.launch" >
+		<arg name="marker_size" value="$(arg smallMarker_size)" />
+	</include>
+
+	<node pkg="uavros_artaglanding_sitl" type="landing_control_p200_node" name="landing_control_p200_node" output="screen" >
+		<param name="search_alt_" value = "2.2"/>	<!--2.2m-->
+		<param name="small_marker_id" value = "0"/>  
+		<param name="big_marker_id" value = "4"/> 
+		<param name="big_marker_size" value = "$(arg bigMarker_size)"/>
+		<param name="small_marker_size" value = "$(arg smallMarker_size)"/>
+		<param name="PidXY_p" value = "0.7"/>	<!--0.5-->
+		<param name="PidXY_d" value = "0.1"/>	
+		<param name="PidXY_i" value = "0"/>	<!--should be 0-->
+		<param name="PidZ_p" value = "0.08"/>	<!--no use-->
+		<param name="PidZ_d" value = "0"/>	<!--no use-->
+		<param name="PidZ_i" value = "0"/>	<!--should be 0-->
+		<param name="PidYaw_p" value = "0.13"/>	<!--0.13-->
+		<param name="PidYaw_d" value = "0"/>	
+		<param name="PidYaw_i" value = "0"/> <!--should be 0-->
+  <!--降准的关键：高度高，下降速度小-->
+		<param name="Thres_count_approach" value = "20"/>	<!--9-->
+		<param name="Thres_count_small" value = "35"/>	<!--35-->
+		<param name="Thres_height_small" value = "1.6"/>	<!-- lower than 1m then switch to small tag -->
+		<param name="Thres_count_land" value = "9"/>	<!--3-->
+		<param name="landing_vel" value = "0.07"/>	 <!--max landing vel 0.1m/s-->
+		<param name="scale_factor" value = "0.4"/>	 <!--landing vel scale in small stage, 0.5-->
+    <param name="landoverH" value = "0.2"/> <!--0.2m--> <!--Height lower than landoverH or tag distance lower than landoverH_tag, land-->
+    <param name="landoverH_tag" value = "0.1"/> <!--0.1m-->			 
+	</node>
+
 </group>
 
-<group ns="$(arg ns1)">
-        <!-- MAVROS and vehicle configs -->
-        <arg name="ID" value="1"/>
-        <arg name="fcu_url" default="udp://:14541@localhost:14581"/>
-        <arg name="x_pos" value="2"/>
-        <arg name="y_pos" value="0"/>
-        <!-- PX4 SITL and vehicle spawn -->
-        <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
-            <arg name="x" value="$(arg x_pos)"/>
-            <arg name="y" value="$(arg y_pos)"/>
-            <arg name="z" value="0"/>
-            <arg name="R" value="0"/>
-            <arg name="P" value="0"/>
-            <arg name="Y" value="0"/>
-            <arg name="vehicle" value="$(arg vehicle)"/>
-            <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
-            <arg name="camNamespace" value="$(arg ns1)"/> <!--add by spx-->
-            <arg name="mavlink_udp_port" value="14561"/>
-            <arg name="mavlink_tcp_port" value="4561"/>
-            <arg name="ID" value="$(arg ID)"/>
-        </include>
-        <!-- MAVROS -->
-        <include file="$(find mavros)/launch/px4.launch">
-            <arg name="fcu_url" value="$(arg fcu_url)"/>
-            <arg name="gcs_url" value=""/>
-            <arg name="tgt_system" value="$(eval 1 + arg('ID'))"/>
-            <arg name="tgt_component" value="1"/>
-        </include>
-</group>
 
 
 

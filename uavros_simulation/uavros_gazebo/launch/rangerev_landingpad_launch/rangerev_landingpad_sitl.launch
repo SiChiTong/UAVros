@@ -1,0 +1,44 @@
+<launch>
+    <!-- launches Gazebo environment and spawns vehicle -->
+
+    <arg name="world" default="$(find mavlink_sitl_gazebo)/worlds/empty.world"/>
+
+    <!-- gazebo world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="gui" value="true"/>
+        <arg name="world_name" value="$(arg world)"/>
+        <arg name="debug" value="false"/>
+        <arg name="verbose" value="false"/>
+        <arg name="paused" value="false"/>
+        <arg name="respawn_gazebo" value="false"/>
+    </include>
+
+    <!-- vehicle pose -->
+<group ns="ugv3">
+
+    <arg name="ID" value="3"/>
+    <arg name="x" default="0"/>
+    <arg name="y" default="0"/>
+    <arg name="z" default="0"/>
+    <arg name="R" default="0"/>
+    <arg name="P" default="0"/>
+    <arg name="Y" default="0"/>
+
+    <arg name="vehicle" default="rangerev_landingpad"/>
+    <arg name="sdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
+    <arg name="urdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).urdf"/>
+    <param name="robot_description" textfile="$(arg urdf)" />
+    <param name="robot_description_sdf" textfile="$(arg sdf)" />
+    <node name="$(anon vehicle_spawn)" pkg="gazebo_ros" type="spawn_model" output="screen" args="-sdf -file $(arg sdf) -model $(arg vehicle)$(arg ID) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
+
+	<!-- 从yaml文件加载联合控制器的参数 -->
+	<rosparam file="$(find uavros_gazebo)/config/$(arg vehicle)_config/ctrl.yaml" command="load"/>
+	<!-- 加载控制器 spawner -->
+	<node name="controller_manager" pkg="controller_manager" type="spawner" 
+	      respawn="false" output="screen" 
+	      args="left_steering_hinge_position_controller joint_state_controller"/>
+</group>
+
+
+</launch>
+

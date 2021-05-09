@@ -186,13 +186,13 @@
     </gui>
     <model name='marker_big'>
       <static>1</static>
-      <pose frame=''>1 1 0.06 0 -0 0</pose>
+      <pose frame=''>0.5 0.5 0.06 0 -0 0</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>0.26 0.26</size>
+              <size>0.175 0.175</size>
             </plane>
           </geometry>
           <surface>
@@ -217,7 +217,7 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>0.26 0.26</size>
+              <size>0.175 0.175</size>
             </plane>
           </geometry>
           <material>
@@ -235,13 +235,13 @@
     </model>
     <model name='marker_small'>
       <static>1</static>
-      <pose frame=''>1 1.2 0.06 0 -0 0</pose>
+      <pose frame=''>0.5 0.63 0.06 0 -0 0</pose>
       <link name='link'>
         <collision name='collision'>
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>0.072 0.072</size>
+              <size>0.053 0.053</size>
             </plane>
           </geometry>
           <surface>
@@ -266,7 +266,7 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>0.072 0.072</size>
+              <size>0.053 0.053</size>
             </plane>
           </geometry>
           <material>

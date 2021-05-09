@@ -1,0 +1,450 @@
+<?xml version="1.0" ?>
+<robot name="rover">
+  <joint name="rover__rover/imu_joint" type="revolute"> <!--modified by spx-->
+    <parent link="rover__base_link"/>
+    <child link="rover__rover/imu_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="0.0" lower="0.0" upper="0.0" velocity="0.0"/>
+  </joint>
+  <joint name="rover__front_left_steering_joint" type="revolute">
+    <parent link="rover__base_link"/>
+    <child link="rover__front_left_wheel_steering_block"/>
+    <origin rpy="1.57079 0      0" xyz="1.20222 0.5     0.35515"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="0.0" lower="-0.7727" upper="0.7727" velocity="0.0"/>
+  </joint>
+  <joint name="rover__front_left_wheel_joint" type="fixed">
+    <parent link="rover__front_left_wheel_steering_block"/>
+    <child link="rover__front_left_wheel"/>
+    <origin rpy="-3.09079  0       0" xyz="0      -0.00818 -0.21562"/>
+    <axis xyz="0.0e+00 8.3e-04 1.0e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="rover__front_right_steering_joint" type="revolute">
+    <parent link="rover__base_link"/>
+    <child link="rover__front_right_wheel_steering_block"/>
+    <origin rpy="1.57079 0      0" xyz="1.20222 -0.5      0.35515"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="0.0" lower="-0.7727" upper="0.7727" velocity="0.0"/>
+  </joint>
+  <joint name="rover__front_right_wheel_joint" type="fixed">
+    <parent link="rover__front_right_wheel_steering_block"/>
+    <child link="rover__front_right_wheel"/>
+    <origin rpy="-0.05079  0       0" xyz="0      -0.00818  0.21562"/>
+    <axis xyz="0.0e+00  8.3e-04 -1.0e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="rover__rear_left_wheel_joint" type="fixed">
+    <parent link="rover__base_link"/>
+    <child link="rover__rear_left_wheel"/>
+    <origin rpy="-1.52  0    0" xyz="-0.99377  0.71562  0.34697"/>
+    <axis xyz="0.0e+00 8.3e-04 1.0e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="rover__rear_right_wheel_joint" type="fixed">
+    <parent link="rover__base_link"/>
+    <child link="rover__rear_right_wheel"/>
+    <origin rpy="1.52 0   0" xyz="-0.99377 -0.61574  0.34189"/>
+    <axis xyz="0.0e+00  8.3e-04 -1.0e+00"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <joint name="rover__gps_joint" type="fixed">
+    <parent link="rover__base_link"/>
+    <child link="rover__gps__link"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
+  <link name="rover__base_link">
+    <inertial>
+      <mass value="720.0"/>
+      <origin rpy="0 0 0" xyz="0.1 0  0.4"/>
+      <inertia ixx="140" ixy="0.0" ixz="0.0" iyy="550" iyz="0.0" izz="550"/>
+    </inertial>
+    <collision name="rover__base_link_bottom">
+      <origin rpy="0 0 0" xyz="0.2   0    0.335"/>
+      <geometry>
+        <box size="1.34 1.65746 0.06"/>
+      </geometry>
+    </collision>
+    <collision name="rover__cargo_bottom">
+      <origin rpy="0 0 0" xyz="-1     0     0.921"/>
+      <geometry>
+        <box size="1.04609 1.6998 0.01"/>
+      </geometry>
+    </collision>
+    <collision name="rover__cargo_front">
+      <origin rpy="0 0 0" xyz="-0.495  0     1.06"/>
+      <geometry>
+        <box size="0.05 1.69982 0.27"/>
+      </geometry>
+    </collision>
+    <collision name="rover__cargo_back">
+      <origin rpy="0 0 0" xyz="-1.465  0     1.06"/>
+      <geometry>
+        <box size="0.05 1.69982 0.27"/>
+      </geometry>
+    </collision>
+    <collision name="rover__cargo_left">
+      <origin rpy="0 0 0" xyz="-0.97     0.82491  1.06"/>
+      <geometry>
+        <box size="1.04609 0.05 0.27"/>
+      </geometry>
+    </collision>
+    <collision name="rover__cargo_right">
+      <origin rpy="0 0 0" xyz="-0.97    -0.82491  1.06"/>
+      <geometry>
+        <box size="1.04609 0.05 0.27"/>
+      </geometry>
+    </collision>
+    <collision name="rover__seat">
+      <origin rpy="0 0 0" xyz="0   0   0.62"/>
+      <geometry>
+        <box size="0.52167 1.37206 0.53369"/>
+      </geometry>
+    </collision>
+    <collision name="rover__mud_seat">
+      <origin rpy="0 0 0" xyz="0   0   0.86"/>
+      <geometry>
+        <box size="0.52167 1.30 0.1"/>
+      </geometry>
+    </collision>
+    <collision name="rover__seat_back">
+      <origin rpy="0  -0.2  0" xyz="-0.26   0     1.125"/>
+      <geometry>
+        <box size="0.06 1.37206 0.6"/>
+      </geometry>
+    </collision>
+    <collision name="rover__engine">
+      <origin rpy="0 0 0" xyz="1.12 0   0.7"/>
+      <geometry>
+        <box size="0.58 1.3 0.8"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_top_left">
+      <origin rpy="0 1.60 0" xyz="-0.02   0.76   1.936"/> <!--modified by spx-->
+      <geometry>
+        <cylinder length="0.68" radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_top_right">
+      <origin rpy="0 1.60 0" xyz="-0.02  -0.76   1.936"/> <!--modified by spx-->
+      <geometry>
+        <cylinder length="0.68" radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_top_front">
+      <origin rpy="0 -1  0" xyz="0.315 0    1.93"/>
+      <geometry>
+        <box size="0.01299 1.54 0.10226"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_top_back">
+      <origin rpy="0 0 0" xyz="-0.41  0    1.88"/>
+      <geometry>
+        <box size="0.01299 1.54 0.10226"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_front_left">
+      <origin rpy="0   -0.54  0" xyz="0.602 0.755 1.45"/>
+      <geometry>
+        <cylinder length="1.15" radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_front_right">
+      <origin rpy="0   -0.54  0" xyz="0.602 -0.755  1.45"/>
+      <geometry>
+        <cylinder length="1.15" radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_back_left">
+      <origin rpy="0 0 0" xyz="-0.4    0.755  1.45"/>
+      <geometry>
+        <cylinder length="1.00" radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_back_right">
+      <origin rpy="0 0 0" xyz="-0.4   -0.755  1.45"/>
+      <geometry>
+        <cylinder length="1.00" radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_X_1">
+      <origin rpy="0.397 0    0" xyz="-0.411  0.04   1.445"/>
+      <geometry>
+        <box size="0.01392 1.557245 0.078"/>
+      </geometry>
+    </collision>
+    <collision name="rover__rollcage_X_2">
+      <origin rpy="-0.397  0     0" xyz="-0.4   -0.04   1.445"/>
+      <geometry>
+        <box size="0.01392 1.557245 0.078"/>
+      </geometry>
+    </collision>
+    <collision name="rover__central_hump1_collision">
+      <origin rpy="0 0 0" xyz="0.55 -0.1   0.4"/>
+      <geometry>
+        <box size="0.6 0.15 0.1"/>
+      </geometry>
+    </collision>
+    <collision name="rover__central_hump2_collision">
+      <origin rpy="0  -0.5  0" xyz="0.7  -0.05  0.45"/>
+      <geometry>
+        <box size="0.20 0.05 0.1"/>
+      </geometry>
+    </collision>
+    <collision name="rover__central_hump3_collision">
+      <origin rpy="0  -0.8  0" xyz="0.798 -0.125  0.478"/>
+      <geometry>
+        <box size="0.129 0.1 0.05"/>
+      </geometry>
+    </collision>
+    <collision name="rover__central_hump4_collision">
+      <origin rpy="0 0 0" xyz="0.8135 -0.05    0.45"/>
+      <geometry>
+        <box size="0.10 0.05 0.1835"/>
+      </geometry>
+    </collision>
+    <collision name="rover__central_hump5_collision">
+      <origin rpy="0 0 0" xyz="0.84  -0.125  0.45"/>
+      <geometry>
+        <box size="0.03 0.1 0.1835"/>
+      </geometry>
+    </collision>
+    <collision name="rover__central_hump6_collision">
+      <origin rpy="0 0 0" xyz="0.82  -0.125  0.475"/>
+      <geometry>
+        <box size="0.03 0.1 0.05"/>
+      </geometry>
+    </collision>
+    <visual name="rover__visual">
+      <origin rpy="0       0      -1.57079" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+    <visual name="rover__cargo_visual">
+      <origin rpy="0      0     -1.5707" xyz="-1      0      1.0323"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+    <visual name="rover__tailgate_visual">
+      <origin rpy="0      0     -1.5707" xyz="-1.492  0     1.03"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+    <visual name="rover__front_left_brake_visual">
+      <origin rpy="3.1415 0     1.5707" xyz="1.12    -0.57487  0.35516"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+    <visual name="rover__front_right_brake_visual">
+      <origin rpy="3.1415 0     1.5707" xyz="1.12    0.57487 0.35516"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.0 1.0 1.0"/>
+      </geometry>
+    </visual>
+    <visual name="rover__central_hump1">
+      <origin rpy="0 0 0" xyz="0.55 -0.1   0.4"/>
+      <geometry>
+        <box size="0.6 0.15 0.1"/>
+      </geometry>
+      <material name="Gazebo/DarkGrey"/> <!--add by spx-->
+        <texture filename="file://media/materials/scripts/gazebo.material"/>
+      </material>
+    </visual>
+    <visual name="rover__central_hump2">
+      <origin rpy="0  -0.5  0" xyz="0.7  -0.05  0.45"/>
+      <geometry>
+        <box size="0.20 0.05 0.1"/>
+      </geometry>
+      <material name="Gazebo/DarkGrey"/> <!--add by spx-->
+        <texture filename="file://media/materials/scripts/gazebo.material"/>
+      </material>
+    </visual>
+    <visual name="rover__central_hump3">
+      <origin rpy="0  -0.8  0" xyz="0.798 -0.125  0.478"/>
+      <geometry>
+        <box size="0.129 0.1 0.05"/>
+      </geometry>
+      <material name="Gazebo/DarkGrey"/> <!--add by spx-->
+        <texture filename="file://media/materials/scripts/gazebo.material"/>
+      </material>
+    </visual>
+    <visual name="rover__central_hump4">
+      <origin rpy="0 0 0" xyz="0.8135 -0.05    0.45"/>
+      <geometry>
+        <box size="0.10 0.05 0.1835"/>
+      </geometry>
+      <material name="Gazebo/DarkGrey"/> <!--add by spx-->
+        <texture filename="file://media/materials/scripts/gazebo.material"/>
+      </material>
+    </visual>
+    <visual name="rover__central_hump5">
+      <origin rpy="0 0 0" xyz="0.84  -0.125  0.45"/>
+      <geometry>
+        <box size="0.03 0.1 0.1835"/>
+      </geometry>
+      <material name="Gazebo/DarkGrey"/> <!--add by spx-->
+        <texture filename="file://media/materials/scripts/gazebo.material"/>
+      </material>
+    </visual>
+    <visual name="rover__central_hump6">
+      <origin rpy="0 0 0" xyz="0.82  -0.125  0.475"/>
+      <geometry>
+        <box size="0.03 0.1 0.05"/>
+      </geometry>
+      <material name="Gazebo/DarkGrey"/> <!--add by spx-->
+        <texture filename="file://media/materials/scripts/gazebo.material"/>
+      </material>
+    </visual>
+  </link>
+  <link name="rover__rover/imu_link">
+    <inertial>
+      <mass value="0.015"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1e-05" ixy="0" ixz="0" iyy="1e-05" iyz="0" izz="1e-05"/>
+    </inertial>
+  </link>
+  <link name="rover__front_left_wheel">
+    <inertial>
+      <mass value="12"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="rover__collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.2794" radius="0.3175"/>
+      </geometry>
+    </collision>
+    <visual name="rover__tire_visual">
+      <origin rpy="3.14159 1.57079 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.003700111 0.886200464 0.886200464"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="rover__front_right_wheel">
+    <inertial>
+      <mass value="12"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="rover__collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.2794" radius="0.3175"/>
+      </geometry>
+    </collision>
+    <visual name="rover__visual">
+      <origin rpy="0      -1.57079  0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.003700111 0.886200464 0.886200464"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="rover__rear_left_wheel">
+    <inertial>
+      <mass value="12"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="rover__collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.2794" radius="0.3175"/>
+      </geometry>
+    </collision>
+    <visual name="rover__visual">
+      <origin rpy="0      -1.57079  0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.003700111 0.886200464 0.886200464"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="rover__rear_right_wheel">
+    <inertial>
+      <mass value="12"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.5" ixy="0.0" ixz="0.0" iyy="0.5" iyz="0.0" izz="1.0"/>
+    </inertial>
+    <collision name="rover__collision">
+      <origin rpy="0 0 0" xyz="0  0  0.1"/>
+      <geometry>
+        <cylinder length="0.2794" radius="0.3175"/>
+      </geometry>
+    </collision>
+    <visual name="rover__visual">
+      <origin rpy="0      -1.57079  0" xyz="0  0  0.1"/>
+      <geometry>
+        <mesh filename="model://rover/meshes/polaris.dae" scale="1.003700111 0.886200464 0.886200464"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="rover__front_right_wheel_steering_block">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
+    </inertial>
+    <collision name="rover__collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="rover__front_left_wheel_steering_block">
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.01"/>
+    </inertial>
+    <collision name="rover__collision">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="rover__gps__link">
+    <inertial>
+      <mass value="0.015"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1e-05" ixy="0" ixz="0" iyy="1e-05" iyz="0" izz="1e-05"/>
+    </inertial>
+    <visual name="rover__gps__visual">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.002" radius="0.01"/>
+      </geometry>
+    </visual>
+  </link>
+
+    <transmission name="front_left_steering_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="rover__front_left_steering_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="front_left_steering_motor">
+        <!-- This hardwareInterface element exists for compatibility
+             with ROS Hydro. -->
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <legacyModeNS>true</legacyModeNS>
+        <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        <!--robotNamespace>/racecar</robotNamespace--> <!-- by spx, do not use absolute namespace-->
+      </plugin>
+    </gazebo>
+
+</robot>

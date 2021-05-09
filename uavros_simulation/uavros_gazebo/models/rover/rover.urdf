@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<!--for more instruction about urdf, please refer to http://wiki.ros.org/urdf/XML and http://gazebosim.org/tutorials/?tut=ros_urdf -->
+
+<robot name="rover">
+
+  <link name="base_link">
+  </link>
+
+  <link name="front_left_wheel_steering_block">
+  </link>
+
+
+  <joint name="front_left_steering_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_left_wheel_steering_block"/>
+    <origin rpy="1.57079 0 0" xyz="1.20222 0.5 0.35515"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.7727" upper="0.7727" velocity="100.0"/>
+    <!-- limit the max effort and angle(rad) and velocity(rad/s) of this joint-->
+  </joint>
+
+    <transmission name="front_left_steering_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="front_left_steering_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="front_left_steering_motor">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+</robot>

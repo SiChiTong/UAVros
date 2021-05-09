@@ -66,13 +66,19 @@ class PX4Landing {
   int Thres_count_small;
   int Thres_count_detect;
   int Thres_count_land;
+  float Thres_height_small;
   std_msgs::Int32 command;
   float landing_vel;
+  float scale_factor;
   float search_alt_;
-  float markers_id_;//需要检测到的小二维码
+  float big_marker_id_;
+  float small_marker_id_;
   float big_marker_size;
   float small_marker_size;
   float markers_yaw_;//二维码相对飞机的偏航角
+  float landoverH_;
+  float landoverH_tag_;
+  float landoverXY_;
   bool detect_state;//是否检测到降落板标志位
   bool detect_small;//是否检测到小二维码
   bool detect_big;//是否检测到大二维码
@@ -91,9 +97,10 @@ class PX4Landing {
   PREPARE,		//起飞到指定高度
   SEARCH,		//搜索
   APPROACH,   //水平接近
-  LANDING,	        //检测到降落板，开始降落
-  LANDOVER,		//结束
-  LAND,		
+  ALIGN,     //旋转对齐二维码的方向
+  LANDING,	    //检测到降落板，开始引导降落降落
+  LANDING_SMALL,  //小二维码引导降落
+  LANDOVER,		//结束，切AUTO.LAND		
 }LandingState = WAITING;//初始状态WAITING
 
   ros::Subscriber ar_pose_sub_;

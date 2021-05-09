@@ -1,0 +1,13 @@
+#racecar: #spx: 不要用绝对路径！
+  # Publish all joint states --公布所有--------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+  
+  # Velocity Controllers ----速度控制器---------------------
+
+  # Position Controllers ---位置控制器-----------------------
+  left_steering_hinge_position_controller:
+    joint: front_left_steering_joint
+    type: effort_controllers/JointPositionController
+    pid: {p: 1000.0, i: 0.0, d: 100}
