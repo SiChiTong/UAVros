@@ -27,18 +27,31 @@
     <arg name="vehicle" default="rover"/>
     <arg name="sdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
     <arg name="urdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).urdf"/>
-    <param name="robot_description" textfile="$(arg urdf)" />
+    <param name="robot_description" textfile="$(arg urdf)" /> <!-- import robot_description of urdf model just for gazebo_ros plugin for controller_manager-->
     <param name="robot_description_sdf" textfile="$(arg sdf)" />
-    <node name="$(anon vehicle_spawn)" pkg="gazebo_ros" type="spawn_model" output="screen" args="-sdf -file $(arg sdf) -model $(arg vehicle)$(arg ID) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
+    <node name="$(anon vehicle_spawn)" pkg="gazebo_ros" type="spawn_model" output="screen" args="-sdf -param robot_description_sdf -model $(arg vehicle)$(arg ID) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
 
 	<!-- 从yaml文件加载联合控制器的参数 -->
 	<rosparam file="$(find uavros_gazebo)/config/$(arg vehicle)_config/ctrl.yaml" command="load"/>
 	<!-- 加载控制器 spawner -->
 	<node name="controller_manager" pkg="controller_manager" type="spawner" 
 	      respawn="false" output="screen" 
-	      args="left_steering_hinge_position_controller joint_state_controller"/>
+	      args="left_steering_hinge_position_controller right_steering_hinge_position_controller
+			left_front_wheel_velocity_controller right_front_wheel_velocity_controller
+			left_rear_wheel_velocity_controller right_rear_wheel_velocity_controller
+			joint_state_controller"/>
+
+	<node pkg="uavros_gazebo" type="rover_servo_commands.py" name="servo_commands" output="screen">
+	</node>
+
+	<node pkg="uavros_gazebo" type="rover_keyboard_control.py" name="rover_keyboard_control" output="screen">
+	</node>
 </group>
 
+<arg name="enable_tune_gui" default="false"/>
+<group if="$(arg enable_tune_gui)">
+  <node name="rover_tune_gui" pkg="rqt_gui" type="rqt_gui" respawn="false" output="screen" args="--perspective-file $(find uavros_gazebo)/config/rover_config/rover_tune.perspective"/>
+</group>
 
 </launch>
 

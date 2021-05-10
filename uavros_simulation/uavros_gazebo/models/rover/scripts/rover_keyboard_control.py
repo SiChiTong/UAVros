@@ -12,13 +12,19 @@ banner = """
         w
    a    s    d
 anything else : stop
+--------------------------
+  key:(speed,steer)
+  w:(1,0)
+  d:(1,-0.6)
+  a:(1,0.6)
+  s:(-1,0)
 CTRL-C to quit
 """
 
 keyBindings = {
   'w':(1,0),
-  'd':(1,-1),
-  'a':(1,1),
+  'd':(1,-0.6),
+  'a':(1,0.6),
   's':(-1,0),
 }
 
@@ -30,7 +36,7 @@ def getKey():
    return key
 
 speed = 1
-turn = 0.6
+turn = 1
 
 def vels(speed,turn):
   return "currently:\tspeed %s\tturn %s " % (speed,turn)
@@ -39,6 +45,7 @@ if __name__=="__main__":
   settings = termios.tcgetattr(sys.stdin)
   pub = rospy.Publisher("ackermann_cmd_mux/output", AckermannDriveStamped,queue_size=1)
   rospy.init_node('keyop')
+  print(banner)
 
   x = 0
   th = 0

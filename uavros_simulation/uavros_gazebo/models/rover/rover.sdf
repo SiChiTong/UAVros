@@ -715,12 +715,18 @@
       <inertial>
         <mass>1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <!--ixx>0.01</ixx>
           <ixy>0.0</ixy>
           <iyy>0.01</iyy>
           <ixz>0.0</ixz>
           <iyz>0.0</iyz>
-          <izz>0.01</izz>
+          <izz>0.01</izz--> <!--modified by spx-->
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <iyy>1.0</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
         </inertia>
       </inertial>
       <collision name="collision">
@@ -737,12 +743,18 @@
       <inertial>
         <mass>1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <!--ixx>0.01</ixx>
           <ixy>0.0</ixy>
           <iyy>0.01</iyy>
           <ixz>0.0</ixz>
           <iyz>0.0</iyz>
-          <izz>0.01</izz>
+          <izz>0.01</izz--> <!--modified by spx-->
+          <ixx>1.0</ixx>
+          <ixy>0.0</ixy>
+          <iyy>1.0</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>1.0</izz>
         </inertia>
       </inertial>
       <collision name="collision">
@@ -836,7 +848,8 @@
       </axis>
     </joint>
 
-    <include>
+<!--comment out by spx-->
+    <!--include>
       <uri>model://gps</uri>
       <pose>0 0 0 0 0 0</pose>
       <name>gps</name>
@@ -896,7 +909,7 @@
       <enable_lockstep>1</enable_lockstep>
       <use_tcp>1</use_tcp>
       <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
-      <!--control_channels>
+      <control_channels>
         <channel name="rear_left_wheel_drive">
           <input_index>5</input_index>
           <input_offset>0</input_offset>
@@ -969,14 +982,61 @@
             <cmdMin>-80</cmdMin>
           </joint_control_pid>
         </channel>
-      </control_channels-->
-    </plugin>
+      </control_channels>
+    </plugin-->
 
+<!--followint added by spx-->
       <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
         <legacyModeNS>true</legacyModeNS>
         <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
         <!--robotNamespace>/rover</robotNamespace--> <!-- by spx, do not use absolute namespace-->
       </plugin>
+
+    <link name="odom_link"> <!--just for odom plugin-->
+      <pose>-1 0 0.5 0.0 0.0 0.0</pose>
+    </link>
+
+    <joint name="odom_link_joint" type="fixed">
+      <child>odom_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
+
+    <!-- the odom plugin attaches to the landing pad at the middle point of the two rear wheels-->
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <!--robotNamespace></robotNamespace--> <!-- by spx, do not define namespace here-->
+      <alwaysOn>true</alwaysOn>
+      <updateRate>30.0</updateRate>
+      <bodyName>odom_link</bodyName>
+      <topicName>odom</topicName>
+      <gaussianNoise>0.00</gaussianNoise>
+      <frameName>world</frameName>
+      <xyzOffsets>0 0 0</xyzOffsets>
+      <rpyOffsets>0 0 0</rpyOffsets>
+    </plugin>
+
+    <include>
+      <uri>model://landing_pad_rover</uri>
+      <pose>-1.0 0.0 1.0 0.0 0.0 0</pose>
+    </include>
+
+    <joint name="landing_pad_joint" type="fixed">
+      <child>landing_pad_rover::landing_pad_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
 
   </model>
 </sdf>
