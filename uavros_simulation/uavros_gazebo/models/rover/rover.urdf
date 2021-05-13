@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!--for more instruction about urdf, please refer to http://wiki.ros.org/urdf/XML and http://gazebosim.org/tutorials/?tut=ros_urdf -->
-
+<!-- created manually by Peixuan Shu, just for gazebo_ros_control plugin in rover.sdf to work-->
 <robot name="rover">
 
   <link name="base_link">

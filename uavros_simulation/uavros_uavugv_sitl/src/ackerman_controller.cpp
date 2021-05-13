@@ -108,11 +108,11 @@ void ackermanCtrl::ugvpose_cb(const nav_msgs::Odometry &msg)
   ugvVel_(2) = msg.twist.twist.linear.z;
   Eigen::Quaterniond quaternion(ugvAtt_);
   Eigen::Vector3d eulerAngle = quaternion.matrix().eulerAngles(2,1,0);
-  if (abs(eulerAngle(1)) > 3)
+  if (abs(eulerAngle(1)) > 3) //pitch should be within (-pi/2,pi/2)
     heading_ = eulerAngle(0) - M_PI;
   else
     heading_ = eulerAngle(0);
-  // cout << "heading: " << heading_*180/M_PI << endl;
+   //cout << "heading: " << heading_*180/M_PI << endl;
 }
 
 void ackermanCtrl::leaderpose_cb(const mavros_msgs::PositionTarget &msg)

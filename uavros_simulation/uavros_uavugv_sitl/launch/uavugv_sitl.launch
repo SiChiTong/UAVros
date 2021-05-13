@@ -1,7 +1,6 @@
 <launch>
 
   <arg name="world_path" default="$(find uavros_gazebo)/worlds/lawn.world" />
-  <arg name="vehicle" default="iris" />
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
 		<arg name="world_name" value="$(arg world_path)"/>
@@ -21,7 +20,7 @@
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
-            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="vehicle" value="iris"/>
             <arg name="mavlink_udp_port" value="14561"/>
             <arg name="mavlink_tcp_port" value="4561"/>
             <arg name="ID" value="$(arg ID)"/>
@@ -74,7 +73,7 @@
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
             <arg name="Y" value="0"/>
-            <arg name="vehicle" value="$(arg vehicle)"/>
+            <arg name="vehicle" value="iris"/>
             <arg name="mavlink_udp_port" value="14562"/>
             <arg name="mavlink_tcp_port" value="4562"/>
             <arg name="ID" value="$(arg ID)"/>

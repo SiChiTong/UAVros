@@ -59,7 +59,7 @@ Visualization Manager:
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
-      Length: 0.30000001192092896
+      Length: 0.10000000149011612
       Line Style: Lines
       Line Width: 0.029999999329447746
       Name: Path_estimator
@@ -68,8 +68,8 @@ Visualization Manager:
         Y: 0
         Z: 0
       Pose Color: 255; 85; 255
-      Pose Style: None
-      Radius: 0.029999999329447746
+      Pose Style: Axes
+      Radius: 0.019999999552965164
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
       Topic: /uav1/trajectory/leader_traj
@@ -117,26 +117,21 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz/Orbit
-      Distance: 7.666904449462891
+      Angle: 0.029999863356351852
+      Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
-      Focal Point:
-        X: -0.5014678239822388
-        Y: 0.46558716893196106
-        Z: 1.1608374118804932
-      Focal Shape Fixed Size: true
-      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7097963094711304
+      Scale: 174.05894470214844
       Target Frame: <Fixed Frame>
-      Value: Orbit (rviz)
-      Yaw: 0.005003456957638264
+      Value: TopDownOrtho (rviz)
+      X: 0.4432884156703949
+      Y: 0.4002217650413513
     Saved: ~
 Window Geometry:
   Displays:
@@ -154,5 +149,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1943
-  X: 1743
-  Y: 194
+  X: 1804
+  Y: 137

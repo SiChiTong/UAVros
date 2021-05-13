@@ -29,7 +29,7 @@
     <arg name="urdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).urdf"/>
     <param name="robot_description" textfile="$(arg urdf)" /> <!-- import robot_description of urdf model just for gazebo_ros plugin for controller_manager-->
     <param name="robot_description_sdf" textfile="$(arg sdf)" />
-    <node name="$(anon vehicle_spawn)" pkg="gazebo_ros" type="spawn_model" output="screen" args="-sdf -param robot_description_sdf -model $(arg vehicle)$(arg ID) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
+    <node name="$(arg vehicle)$(arg ID)_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-sdf -param robot_description_sdf -model $(arg vehicle)$(arg ID) -x $(arg x) -y $(arg y) -z $(arg z) -R $(arg R) -P $(arg P) -Y $(arg Y)"/>
 
 	<!-- 从yaml文件加载联合控制器的参数 -->
 	<rosparam file="$(find uavros_gazebo)/config/$(arg vehicle)_config/ctrl.yaml" command="load"/>
