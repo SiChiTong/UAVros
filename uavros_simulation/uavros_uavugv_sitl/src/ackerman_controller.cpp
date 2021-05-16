@@ -21,7 +21,7 @@ ackermanCtrl::ackermanCtrl (const ros::NodeHandle &nh, const ros::NodeHandle &nh
   cmdSub_ = nh_.subscribe("/cmd", 1, &ackermanCtrl::cmd_cb, this, ros::TransportHints().tcpNoDelay()); 
   target_pose_pub_ = nh_.advertise<ackermann_msgs::AckermannDriveStamped>("ackermann_cmd_mux/output", 10);
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.01), &ackermanCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.05), &ackermanCtrl::cmdloop_cb, this);  // Define timer for constant loop rate, the max frequency beike car can control is 20Hz  
 
   nh_private_.param<double>("v_max", v_max_, 2.5);
   nh_private_.param<double>("steering_max_rad", delta_max_, 0.35);

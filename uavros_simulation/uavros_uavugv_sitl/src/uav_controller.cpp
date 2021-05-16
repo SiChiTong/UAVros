@@ -26,7 +26,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
   setMode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.01), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.02), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
 
   nh_private_.param<double>("alt_sp", alt_sp, 2.5);
   nh_private_.param<double>("Kp_x", Kpos_x_, 0.5);
@@ -40,6 +40,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   nh_private_.param<double>("h_omega", h_omega_, 0);
   nh_private_.param<double>("h_radius", h_radius_, 0);
   nh_private_.param<double>("h_phi", h_phi_, 0.0);
+  nh_private_.param<double>("axy_max", axy_max_, 1.5);
 
   Kpos_ << Kpos_x_, Kpos_y_, Kpos_z_;
   Kvel_ << Kvel_x_, Kvel_y_, Kvel_z_;
@@ -111,6 +112,8 @@ void uavCtrl::computeAccCmd(Eigen::Vector3d &acc_cmd, const Eigen::Vector3d &tar
   const Eigen::Vector3d vel_error = target_vel - mavVel_;
 
   acc_cmd = Kpos_.asDiagonal() * pos_error + Kvel_.asDiagonal() * vel_error + target_acc;
+  acc_cmd(0) = max(-axy_max_, min(axy_max_, acc_cmd(0)));
+  acc_cmd(1) = max(-axy_max_, min(axy_max_, acc_cmd(1)));
 }
 
 void uavCtrl::pubAccCmd(const Eigen::Vector3d &cmd_acc)

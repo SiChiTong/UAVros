@@ -15,8 +15,8 @@
   	<arg name="sdf" default="$(find uavros_gazebo)/models/iris_usb_camera_down/iris_usb_camera_down.sdf"/>
         <arg name="ID" value="1"/>
         <arg name="cam_namespace" value="$(arg ns1)"/>
-        <arg name="x_pos" value="3.75"/>
-        <arg name="y_pos" value="1.21"/>
+        <arg name="x_pos" value="4.1"/>
+        <arg name="y_pos" value="1"/>
         <arg name="z_pos" value="1.5"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
@@ -25,7 +25,7 @@
             <arg name="z" value="$(arg z_pos)"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
-            <arg name="Y" value="0.675"/>
+            <arg name="Y" value="1.5708"/>
             <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
             <arg name="camNamespace" value="$(arg cam_namespace)"/> <!--add by spx-->
             <arg name="mavlink_udp_port" value="$(eval 14560 + arg('ID'))"/>
@@ -52,9 +52,10 @@
         <param name="Kp_y" value = "1"/>
         <param name="Kv_x" value = "1"/>
         <param name="Kv_y" value = "1"/>
-        <param name="h_omega" value = "0.05"/>
+        <param name="h_omega" value = "0.1"/>
         <param name="h_radius" value = "1.7"/>
         <param name="h_phi" value = "0.0"/>
+        <param name="axy_max" value = "1.5"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
@@ -63,6 +64,7 @@
         <param name="esm_x_init" value = "3.75"/>
         <param name="esm_y_init" value = "1.21"/>
         <param name="neighbor1_name" value = "ugv3"/>
+        <param name="rviz_path_length" value = "100"/>
     </node>
 </group>
 
@@ -71,8 +73,8 @@
   	<arg name="sdf" default="$(find uavros_gazebo)/models/iris_usb_camera_down/iris_usb_camera_down.sdf"/>
         <arg name="ID" value="2"/>
         <arg name="cam_namespace" value="$(arg ns2)"/>
-        <arg name="x_pos" value="4.25"/>
-        <arg name="y_pos" value="0.59"/>
+        <arg name="x_pos" value="4.9"/>
+        <arg name="y_pos" value="1"/>
         <arg name="z_pos" value="1.5"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
@@ -81,7 +83,7 @@
             <arg name="z" value="$(arg z_pos)"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
-            <arg name="Y" value="0.675"/>
+            <arg name="Y" value="1.5708"/>
             <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
             <arg name="camNamespace" value="$(arg cam_namespace)"/> <!--add by spx-->
             <arg name="mavlink_udp_port" value="$(eval 14560 + arg('ID'))"/>
@@ -108,9 +110,10 @@
         <param name="Kp_y" value = "1"/>
         <param name="Kv_x" value = "1"/>
         <param name="Kv_y" value = "1"/>
-        <param name="h_omega" value = "0.05"/>
+        <param name="h_omega" value = "0.1"/>
         <param name="h_radius" value = "2.1"/>
         <param name="h_phi" value = "3.1415"/>
+        <param name="axy_max" value = "1.5"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
@@ -119,6 +122,7 @@
         <param name="esm_x_init" value = "4.25"/>
         <param name="esm_y_init" value = "0.59"/>
         <param name="neighbor1_name" value = "ugv3"/>
+        <param name="rviz_path_length" value = "100"/>
     </node>
 </group>
 
@@ -126,10 +130,10 @@
 
 <group ns="$(arg ns3)">
     <arg name="ID" value="3"/>
-    <arg name="x_pos" default="4.78"/>
-    <arg name="y_pos" default="1.53"/>
+    <arg name="x_pos" default="4.5"/>
+    <arg name="y_pos" default="2"/>
     <arg name="z_pos" default="0"/>
-    <arg name="yaw" default="0.675"/>
+    <arg name="yaw" default="1.5708"/>
     <!-- 在gazebo中加载机器人模型-->
     <arg name="vehicle" default="rover"/>
     <arg name="sdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
@@ -159,16 +163,19 @@
         <param name="esm_x_init" value = "4.78"/>
         <param name="esm_y_init" value = "1.53"/>
         <param name="neighbor1_name" value = "virtual_leader_line"/>
-        <param name="virtual_leader_vx" value = "0.05"/>
+        <param name="virtual_leader_vx" value = "0.0"/>
         <param name="virtual_leader_vy" value = "0.05"/>
+        <param name="shape_x0" value = "5.5"/>
+        <param name="shape_y0" value = "4.0"/>
+        <param name="rviz_path_length" value = "100"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="ackerman_controller_node" name="ackerman_controller" output="screen">
         <param name="v_max" value = "1"/>
         <param name="steering_max_rad" value = "0.35"/>
-    	<param name="Kp_x" value = "0.5"/>
-        <param name="Kp_y" value = "0.5"/>
-        <param name="Kp_heading" value = "1.0"/>
+    	<param name="Kp_x" value = "0.1"/>
+        <param name="Kp_y" value = "0.1"/>
+        <param name="Kp_heading" value = "0.3"/>
         <param name="init_phi" value = "$(arg yaw)"/>
         <param name="wheelbase" value = "2.054"/>
     </node>	

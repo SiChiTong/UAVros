@@ -1,0 +1,21 @@
+<launch>
+
+  <arg name="rviz_visual" default="true"/>
+  <group if="$(arg rviz_visual)">
+      <node type="rviz" name="rviz" pkg="rviz" args="-d /home/spx/UAVros/uavros_simulation/uavros_uavugv_sitl/config/rviz_uavrover.rviz" />
+  </group>
+
+  <arg name="rqt_image" default="true"/>
+  <group if="$(arg rqt_image)">
+    <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view1" output="screen">
+    </node>
+    <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view2" output="screen">
+    </node>
+  </group>
+
+  <arg name="plot" default="true"/>
+  <group if="$(arg plot)">
+      <node type="plotjuggler" name="plotjuggler" pkg="plotjuggler"/>
+  </group>
+
+</launch>
