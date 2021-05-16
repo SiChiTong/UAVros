@@ -184,7 +184,7 @@
 
   <arg name="rviz_visual" default="true"/>
   <group if="$(arg rviz_visual)">
-      <node type="rviz" name="rviz" pkg="rviz" args="-d /home/spx/UAVros/uavros_simulation/uavros_uavugv_sitl/config/rviz_uavrover.rviz" />
+      <node type="rviz" name="rviz" pkg="rviz" args="-d $(find uavros_uavugv_sitl)/config/rviz_uavrover.rviz" />
   </group>
 
   <arg name="rqt_image" default="true"/>
