@@ -15,8 +15,8 @@
   	<arg name="sdf" default="$(find uavros_gazebo)/models/iris_usb_camera_down/iris_usb_camera_down.sdf"/>
         <arg name="ID" value="1"/>
         <arg name="cam_namespace" value="$(arg ns1)"/>
-        <arg name="x_pos" value="-1"/>
-        <arg name="y_pos" value="0.4"/>
+        <arg name="x_pos" value="3.75"/>
+        <arg name="y_pos" value="1.21"/>
         <arg name="z_pos" value="1.5"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
@@ -25,7 +25,7 @@
             <arg name="z" value="$(arg z_pos)"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
-            <arg name="Y" value="1.570796"/>
+            <arg name="Y" value="0.675"/>
             <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
             <arg name="camNamespace" value="$(arg cam_namespace)"/> <!--add by spx-->
             <arg name="mavlink_udp_port" value="$(eval 14560 + arg('ID'))"/>
@@ -42,41 +42,8 @@
         </include>
 
         <!-- ARtag guided autonomous landing -->
-	<arg name="smallMarker_size" value="12.92"/> <!--cm-->
-	<arg name="bigMarker_size" value="38.76"/> <!--cm-->
 
-	<include file="$(find uavros_artaglanding_sitl)/launch/ar_track_camera_sitl.launch" >
-		<arg name="marker_size" value="$(arg smallMarker_size)" />
-	</include>
-
-	<node pkg="uavros_artaglanding_sitl" type="landing_control_p200_node" name="landing_control_p200_node" output="screen" >
-		<param name="search_alt_" value = "3.2"/>	<!--2.2m-->
-		<param name="small_marker_id" value = "0"/>  
-		<param name="big_marker_id" value = "4"/> 
-		<param name="big_marker_size" value = "$(arg bigMarker_size)"/>
-		<param name="small_marker_size" value = "$(arg smallMarker_size)"/>
-		<param name="PidXY_p" value = "0.7"/>	<!--0.5-->
-		<param name="PidXY_d" value = "0.1"/>	
-		<param name="PidXY_i" value = "0"/>	<!--should be 0-->
-		<param name="PidZ_p" value = "0.08"/>	<!--no use-->
-		<param name="PidZ_d" value = "0"/>	<!--no use-->
-		<param name="PidZ_i" value = "0"/>	<!--should be 0-->
-		<param name="PidYaw_p" value = "0.13"/>	<!--0.13-->
-		<param name="PidYaw_d" value = "0"/>	
-		<param name="PidYaw_i" value = "0"/> <!--should be 0-->
-  <!--降准的关键：高度高，下降速度小-->
-		<param name="Thres_count_approach" value = "20"/>	<!--9-->
-		<param name="Thres_count_small" value = "35"/>	<!--35-->
-		<param name="Thres_height_small" value = "1.6"/>	<!-- lower than 1m then switch to small tag -->
-		<param name="Thres_count_land" value = "9"/>	<!--3-->
-		<param name="landing_vel" value = "0.07"/>	 <!--max landing vel 0.1m/s-->
-		<param name="scale_factor" value = "0.4"/>	 <!--landing vel scale in small stage, 0.5-->
-    		<param name="landoverH" value = "0.2"/> <!--0.2m--> <!--Height lower than landoverH or tag distance lower than landoverH_tag, land-->
-    		<param name="landoverH_tag" value = "0.1"/> <!--0.1m-->			 
-	</node>
-
-
-    <arg name="altitude" default = "2.5"/>
+    <arg name="altitude" default = "1.2"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
         <param name="init_x" value = "$(arg x_pos)"/>
@@ -85,16 +52,16 @@
         <param name="Kp_y" value = "1"/>
         <param name="Kv_x" value = "1"/>
         <param name="Kv_y" value = "1"/>
-        <param name="h_omega" value = "1"/>
-        <param name="h_radius" value = "1.5"/>
+        <param name="h_omega" value = "0.05"/>
+        <param name="h_radius" value = "1.7"/>
         <param name="h_phi" value = "0.0"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
-        <param name="alpha" value = "0.5"/>
-        <param name="esm_x_init" value = "0.42"/>
-        <param name="esm_y_init" value = "-0.34"/>
+        <param name="alpha" value = "3"/>
+        <param name="esm_x_init" value = "3.75"/>
+        <param name="esm_y_init" value = "1.21"/>
         <param name="neighbor1_name" value = "ugv3"/>
     </node>
 </group>
@@ -104,8 +71,8 @@
   	<arg name="sdf" default="$(find uavros_gazebo)/models/iris_usb_camera_down/iris_usb_camera_down.sdf"/>
         <arg name="ID" value="2"/>
         <arg name="cam_namespace" value="$(arg ns2)"/>
-        <arg name="x_pos" value="-1"/>
-        <arg name="y_pos" value="-0.4"/>
+        <arg name="x_pos" value="4.25"/>
+        <arg name="y_pos" value="0.59"/>
         <arg name="z_pos" value="1.5"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
@@ -114,7 +81,7 @@
             <arg name="z" value="$(arg z_pos)"/>
             <arg name="R" value="0"/>
             <arg name="P" value="0"/>
-            <arg name="Y" value="1.570796"/>
+            <arg name="Y" value="0.675"/>
             <arg name="sdf" value="$(arg sdf)"/> <!--add by spx-->
             <arg name="camNamespace" value="$(arg cam_namespace)"/> <!--add by spx-->
             <arg name="mavlink_udp_port" value="$(eval 14560 + arg('ID'))"/>
@@ -131,38 +98,6 @@
         </include>
 
         <!-- ARtag guided autonomous landing -->
-	<arg name="smallMarker_size" value="12.92"/> <!--cm-->
-	<arg name="bigMarker_size" value="38.76"/> <!--cm-->
-
-	<include file="$(find uavros_artaglanding_sitl)/launch/ar_track_camera_sitl.launch" >
-		<arg name="marker_size" value="$(arg smallMarker_size)" />
-	</include>
-
-	<node pkg="uavros_artaglanding_sitl" type="landing_control_p200_node" name="landing_control_p200_node" output="screen" >
-		<param name="search_alt_" value = "3.5"/>	<!--2.2m-->
-		<param name="small_marker_id" value = "2"/>  
-		<param name="big_marker_id" value = "8"/> 
-		<param name="big_marker_size" value = "$(arg bigMarker_size)"/>
-		<param name="small_marker_size" value = "$(arg smallMarker_size)"/>
-		<param name="PidXY_p" value = "0.7"/>	<!--0.5-->
-		<param name="PidXY_d" value = "0.1"/>	
-		<param name="PidXY_i" value = "0"/>	<!--should be 0-->
-		<param name="PidZ_p" value = "0.08"/>	<!--no use-->
-		<param name="PidZ_d" value = "0"/>	<!--no use-->
-		<param name="PidZ_i" value = "0"/>	<!--should be 0-->
-		<param name="PidYaw_p" value = "0.13"/>	<!--0.13-->
-		<param name="PidYaw_d" value = "0"/>	
-		<param name="PidYaw_i" value = "0"/> <!--should be 0-->
-  <!--降准的关键：高度高，下降速度小-->
-		<param name="Thres_count_approach" value = "20"/>	<!--9-->
-		<param name="Thres_count_small" value = "35"/>	<!--35-->
-		<param name="Thres_height_small" value = "1.6"/>	<!-- lower than 1m then switch to small tag -->
-		<param name="Thres_count_land" value = "9"/>	<!--3-->
-		<param name="landing_vel" value = "0.07"/>	 <!--max landing vel 0.1m/s-->
-		<param name="scale_factor" value = "0.4"/>	 <!--landing vel scale in small stage, 0.5-->
-    		<param name="landoverH" value = "0.2"/> <!--0.2m--> <!--Height lower than landoverH or tag distance lower than landoverH_tag, land-->
-    		<param name="landoverH_tag" value = "0.1"/> <!--0.1m-->			 
-	</node>
 
     <arg name="altitude" default = "2.7"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
@@ -173,16 +108,16 @@
         <param name="Kp_y" value = "1"/>
         <param name="Kv_x" value = "1"/>
         <param name="Kv_y" value = "1"/>
-        <param name="h_omega" value = "1"/>
-        <param name="h_radius" value = "2"/>
+        <param name="h_omega" value = "0.05"/>
+        <param name="h_radius" value = "2.1"/>
         <param name="h_phi" value = "3.1415"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
-        <param name="alpha" value = "0.5"/>
-        <param name="esm_x_init" value = "-0.38"/>
-        <param name="esm_y_init" value = "0.86"/>
+        <param name="alpha" value = "3"/>
+        <param name="esm_x_init" value = "4.25"/>
+        <param name="esm_y_init" value = "0.59"/>
         <param name="neighbor1_name" value = "ugv3"/>
     </node>
 </group>
@@ -191,10 +126,10 @@
 
 <group ns="$(arg ns3)">
     <arg name="ID" value="3"/>
-    <arg name="x_pos" default="0"/>
-    <arg name="y_pos" default="0"/>
+    <arg name="x_pos" default="4.78"/>
+    <arg name="y_pos" default="1.53"/>
     <arg name="z_pos" default="0"/>
-    <arg name="yaw" default="0"/>
+    <arg name="yaw" default="0.675"/>
     <!-- 在gazebo中加载机器人模型-->
     <arg name="vehicle" default="rover"/>
     <arg name="sdf" default="$(find uavros_gazebo)/models/$(arg vehicle)/$(arg vehicle).sdf"/>
@@ -220,12 +155,12 @@
     <arg name="altitude" default = "0.0"/>
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
-        <param name="alpha" value = "0.5"/>
-        <param name="esm_x_init" value = "0.49"/>
-        <param name="esm_y_init" value = "0.58"/>
+        <param name="alpha" value = "3"/>
+        <param name="esm_x_init" value = "4.78"/>
+        <param name="esm_y_init" value = "1.53"/>
         <param name="neighbor1_name" value = "virtual_leader_line"/>
-        <param name="virtual_leader_vx" value = "0.1"/>
-        <param name="virtual_leader_vy" value = "0.1"/>
+        <param name="virtual_leader_vx" value = "0.05"/>
+        <param name="virtual_leader_vy" value = "0.05"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="ackerman_controller_node" name="ackerman_controller" output="screen">

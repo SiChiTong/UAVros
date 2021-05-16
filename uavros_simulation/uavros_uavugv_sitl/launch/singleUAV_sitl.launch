@@ -24,7 +24,7 @@
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
-        <param name="alpha" value = "0.5"/>
+        <param name="alpha" value = "5"/>
         <param name="neighbor1_name" value = "ugv3"/>
     </node>
 </group>

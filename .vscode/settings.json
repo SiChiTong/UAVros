@@ -70,5 +70,12 @@
         "mavros",
         "peixuan"
     ],
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "python.analysis.extraPaths": [
+        "/home/spx/UAVros/devel/lib/python2.7/dist-packages",
+        "/home/spx/rgbd_ws/devel/lib/python2.7/dist-packages",
+        "/home/spx/Prometheus/devel/lib/python2.7/dist-packages",
+        "/home/spx/mavros_controllers_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ]
 }
