@@ -18,6 +18,8 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
 {
   nh_private_.param<double>("shape_omega", shape_omega_, 0.5);
   nh_private_.param<double>("shape_radius", shape_radius_, 1);
+  nh_private_.param<double>("shape_x0", shape_x0_, 0);
+  nh_private_.param<double>("shape_y0", shape_y0_, 0);
   nh_private_.param<double>("alt_sp", alt_sp, 2.5);
   nh_private_.param<double>("alpha", alpha_, 1); // coefficient of the distributed estimator
   nh_private_.param<double>("esm_x_init", esm_x_init_, 0.0);
@@ -102,8 +104,8 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
     {
       if (ng_name1_ == "virtual_leader_line")
       {
-        y_hat1_(0) = l_vx_ * t_;
-        y_hat1_(1) = l_vy_ * t_;
+        y_hat1_(0) = l_vx_ * t_ + shape_x0_;
+        y_hat1_(1) = l_vy_ * t_ + shape_y0_;
       }
       distributed_estimator(dt_);
     }
@@ -150,8 +152,8 @@ void leaderEstimate::circleCreator(double t)
 { //circle creator
   double theta;
   theta = shape_omega_ * t;
-  leaderPos_(0) = shape_radius_ * cos(theta);
-  leaderPos_(1) = shape_radius_ * sin(theta);
+  leaderPos_(0) = shape_radius_ * cos(theta) + shape_x0_;
+  leaderPos_(1) = shape_radius_ * sin(theta) + shape_y0_;
   leaderVel_(0) = - shape_radius_ * shape_omega_* sin(theta);
   leaderVel_(1) = shape_radius_ * shape_omega_* cos(theta);
   leaderAcc_(0) = - shape_radius_ * shape_omega_* shape_omega_ * cos(theta);

@@ -79,11 +79,11 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
       t1_start_ = ros::Time::now().toSec();
     }
     state_num_ = 1;
-    if (px4_state_.mode != "OFFBOARD")
+    /*if (px4_state_.mode != "OFFBOARD")
     {
         mode_cmd_.request.custom_mode = "OFFBOARD";
 				setMode_client_.call(mode_cmd_);
-    }
+    }*/
     t_ = ros::Time::now().toSec() - t1_start_ + t1_accum_;
     double theta;
     theta = h_omega_ * t_;

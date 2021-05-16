@@ -31,6 +31,8 @@
         <param name="neighbor1_name" value = "virtual_leader_circle"/>
         <param name="shape_omega" value = "0.1"/>
         <param name="shape_radius" value = "1.5"/>
+        <param name="shape_x0" value = "5"/>
+        <param name="shape_y0" value = "10"/>
         <param name="rviz_path_length" value = "100"/>
     </node>
 </group>
