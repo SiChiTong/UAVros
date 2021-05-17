@@ -1,9 +1,9 @@
 <launch>
 
-  <arg name="world_path" default="$(find uavros_gazebo)/worlds/empty.world" />
+  <arg name="world_path" default="$(find uavros_gazebo)/worlds/empty_ARtag6.world" />
 
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<!--arg name="world_name" value="$(arg world_path)"/-->
+		<arg name="world_name" value="$(arg world_path)"/>
 	</include>
 
 <arg name="ns1" value="uav1"/>
@@ -41,8 +41,7 @@
             <arg name="tgt_component" value="1"/>
         </include>
 
-        <!-- ARtag guided autonomous landing -->
-
+    <!-- Formation controller and estimator -->
     <arg name="altitude" default = "1.2"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
@@ -56,6 +55,7 @@
         <param name="h_radius" value = "1.7"/>
         <param name="h_phi" value = "0.0"/>
         <param name="axy_max" value = "1.5"/>
+        <param name="land_command" value = "11"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
@@ -66,6 +66,43 @@
         <param name="neighbor1_name" value = "ugv3"/>
         <param name="rviz_path_length" value = "100"/>
     </node>
+
+        <!-- ARtag guided autonomous landing -->
+	<arg name="smallMarker_size" value="12.92"/> <!--cm-->
+	<arg name="bigMarker_size" value="38.76"/> <!--cm-->
+
+	<include file="$(find uavros_artaglanding_sitl)/launch/ar_track_camera_sitl.launch" >
+		<arg name="marker_size" value="$(arg smallMarker_size)" />
+	</include>
+
+	<node pkg="uavros_artaglanding_sitl" type="landing_service_node" name="landing_service_node" output="screen" >
+		<param name="search_alt_" value = "2.8"/>	<!--2.2m-->
+		<param name="small_marker_id" value = "0"/>  
+		<param name="big_marker_id" value = "4"/> 
+		<param name="target_marker_id" value = "6"/> 
+		<param name="big_marker_size" value = "$(arg bigMarker_size)"/>
+		<param name="small_marker_size" value = "$(arg smallMarker_size)"/>
+		<param name="PidXY_p" value = "0.7"/>	<!--0.5-->
+		<param name="PidXY_d" value = "0.1"/>	
+		<param name="PidXY_i" value = "0"/>	<!--should be 0-->
+		<param name="PidZ_p" value = "0.08"/>	<!--no use-->
+		<param name="PidZ_d" value = "0"/>	<!--no use-->
+		<param name="PidZ_i" value = "0"/>	<!--should be 0-->
+		<param name="PidYaw_p" value = "0.13"/>	<!--0.13-->
+		<param name="PidYaw_d" value = "0"/>	
+		<param name="PidYaw_i" value = "0"/> <!--should be 0-->
+  <!--降准的关键：高度高，下降速度小-->
+		<param name="Thres_count_approach" value = "20"/>	<!--9-->
+		<param name="Thres_count_small" value = "35"/>	<!--35-->
+		<param name="Thres_height_small" value = "1.6"/>	<!-- lower than 1m then switch to small tag -->
+		<param name="Thres_count_land" value = "9"/>	<!--3-->
+		<param name="landing_vel" value = "0.07"/>	 <!--max landing vel 0.1m/s-->
+		<param name="scale_factor" value = "0.4"/>	 <!--landing vel scale in small stage, 0.5-->
+    		<param name="landoverH" value = "0.2"/> <!--0.2m--> <!--Height lower than landoverH or tag distance lower than landoverH_tag, land-->
+    		<param name="landoverH_tag" value = "0.1"/> <!--0.1m-->	
+        	<param name="init_x" value = "$(arg x_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->
+        	<param name="init_y" value = "$(arg y_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->
+	</node>
 </group>
 
 <group ns="$(arg ns2)">
@@ -99,8 +136,7 @@
             <arg name="tgt_component" value="1"/>
         </include>
 
-        <!-- ARtag guided autonomous landing -->
-
+    <!-- Formation controller and estimator -->
     <arg name="altitude" default = "2.7"/>
     <node pkg="uavros_uavugv_sitl" type="uav_controller_node" name="uav_controller" output="screen">
         <param name="alt_sp" value = "$(arg altitude)"/>
@@ -114,6 +150,7 @@
         <param name="h_radius" value = "2.1"/>
         <param name="h_phi" value = "3.1415"/>
         <param name="axy_max" value = "1.5"/>
+        <param name="land_command" value = "12"/>
     </node>
 
     <node pkg="uavros_uavugv_sitl" type="leader_estimator_node" name="leader_estimator" output="screen">
@@ -124,6 +161,43 @@
         <param name="neighbor1_name" value = "ugv3"/>
         <param name="rviz_path_length" value = "100"/>
     </node>
+
+        <!-- ARtag guided autonomous landing -->
+	<arg name="smallMarker_size" value="12.92"/> <!--cm-->
+	<arg name="bigMarker_size" value="38.76"/> <!--cm-->
+
+	<include file="$(find uavros_artaglanding_sitl)/launch/ar_track_camera_sitl.launch" >
+		<arg name="marker_size" value="$(arg smallMarker_size)" />
+	</include>
+
+	<node pkg="uavros_artaglanding_sitl" type="landing_service_node" name="landing_service_node" output="screen" >
+		<param name="search_alt_" value = "2.8"/>	<!--2.2m-->
+		<param name="small_marker_id" value = "2"/>  
+		<param name="big_marker_id" value = "8"/> 
+		<param name="target_marker_id" value = "6"/> 
+		<param name="big_marker_size" value = "$(arg bigMarker_size)"/>
+		<param name="small_marker_size" value = "$(arg smallMarker_size)"/>
+		<param name="PidXY_p" value = "0.7"/>	<!--0.5-->
+		<param name="PidXY_d" value = "0.1"/>	
+		<param name="PidXY_i" value = "0"/>	<!--should be 0-->
+		<param name="PidZ_p" value = "0.08"/>	<!--no use-->
+		<param name="PidZ_d" value = "0"/>	<!--no use-->
+		<param name="PidZ_i" value = "0"/>	<!--should be 0-->
+		<param name="PidYaw_p" value = "0.13"/>	<!--0.13-->
+		<param name="PidYaw_d" value = "0"/>	
+		<param name="PidYaw_i" value = "0"/> <!--should be 0-->
+  <!--降准的关键：高度高，下降速度小-->
+		<param name="Thres_count_approach" value = "20"/>	<!--9-->
+		<param name="Thres_count_small" value = "35"/>	<!--35-->
+		<param name="Thres_height_small" value = "1.6"/>	<!-- lower than 1m then switch to small tag -->
+		<param name="Thres_count_land" value = "9"/>	<!--3-->
+		<param name="landing_vel" value = "0.07"/>	 <!--max landing vel 0.1m/s-->
+		<param name="scale_factor" value = "0.4"/>	 <!--landing vel scale in small stage, 0.5-->
+    		<param name="landoverH" value = "0.2"/> <!--0.2m--> <!--Height lower than landoverH or tag distance lower than landoverH_tag, land-->
+    		<param name="landoverH_tag" value = "0.1"/> <!--0.1m-->	
+        	<param name="init_x" value = "$(arg x_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->
+        	<param name="init_y" value = "$(arg y_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->				 
+	</node>
 </group>
 
 
@@ -132,7 +206,7 @@
     <arg name="ID" value="3"/>
     <arg name="x_pos" default="4.5"/>
     <arg name="y_pos" default="2"/>
-    <arg name="z_pos" default="0"/>
+    <arg name="z_pos" default="0.05"/>
     <arg name="yaw" default="1.5708"/>
     <!-- 在gazebo中加载机器人模型-->
     <arg name="vehicle" default="rover"/>

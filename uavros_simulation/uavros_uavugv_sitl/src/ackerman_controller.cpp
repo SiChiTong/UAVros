@@ -62,7 +62,8 @@ void ackermanCtrl::cmdloop_cb(const ros::TimerEvent &event)
     computeSetpoint(v_sp_, delta_sp_, leaderPos_, leaderVel_, leaderAcc_); 
     break; 
   default:
-    cout << "error command!" << endl;
+    command_ = 0; //any other command will leader to case 0
+    cout << "ugv controller: unknown command, switch to command 0" << endl;
     break;
   }
   pubSetpoint(v_sp_, delta_sp_);

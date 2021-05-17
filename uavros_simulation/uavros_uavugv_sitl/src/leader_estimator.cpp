@@ -112,7 +112,8 @@ void leaderEstimate::cmdloop_cb(const ros::TimerEvent &event)
     break; 
 
   default:
-    cout << "error command!" << endl;
+    command_ = 0; //any other command will leader to case 0
+    cout << "leader estimator: unknown command, switch to command 0" << endl;
     break;
   }
 
@@ -212,5 +213,5 @@ void leaderEstimate::ng_estimate_cb1(const mavros_msgs::PositionTarget &msg)
 void leaderEstimate::cmd_cb(const std_msgs::Int32 &msg)
 {
 	command_ = msg.data;
-	cout << "receive command: " << command_ << endl;
+	cout << "leader estimator receive command: " << command_ << endl;
 }

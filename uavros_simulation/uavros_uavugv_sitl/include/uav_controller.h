@@ -26,6 +26,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <std_msgs/Int32.h>
+#include <std_srvs/SetBool.h>
 
 
 
@@ -45,6 +46,7 @@ class uavCtrl
     ros::Publisher target_pose_pub_;    
     ros::ServiceClient arming_client_;
     ros::ServiceClient setMode_client_;
+    ros::ServiceClient precise_landing_client_;
     ros::Timer cmdloop_timer_;
 
     Eigen::Vector4d mavAtt_;
@@ -59,7 +61,16 @@ class uavCtrl
     double t1_start_, t1_accum_, t_;
     double h_omega_, h_radius_, h_phi_;
     double axy_max_;
-    int command_, state_num_;
+    int command_;
+    int land_command_;
+    enum ControllerState
+    {
+      HOVER,		
+      CONTROL_FLY,
+      LAND
+    };
+    ControllerState controller_state = HOVER;//初始状态HOVER
+    ControllerState last_state = HOVER;//初始状态HOVER
     mavros_msgs::State px4_state_;
     mavros_msgs::SetMode mode_cmd_;
 

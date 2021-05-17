@@ -8,7 +8,7 @@ Panels:
         - /Status1
         - /odom_ugv31/Shape1
       Splitter Ratio: 0.6387225389480591
-    Tree Height: 810
+    Tree Height: 408
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -245,5 +245,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1393
-  X: 545
-  Y: 71
+  X: 2117
+  Y: 78

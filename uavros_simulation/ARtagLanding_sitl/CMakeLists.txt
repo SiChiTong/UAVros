@@ -47,12 +47,15 @@ include_directories(
 
 
 add_executable(landing_control_p200_node src/landing_control_p200.cpp)
-
+add_executable(landing_service_node src/landing_service.cpp)
 
 ## Specify libraries to link a library or executable target against
 
 
 target_link_libraries(landing_control_p200_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(landing_service_node
   ${catkin_LIBRARIES}
 )
 
@@ -65,6 +68,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 ## Mark executables and/or libraries for installation
 install(TARGETS  
   landing_control_p200_node
+  landing_service_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
