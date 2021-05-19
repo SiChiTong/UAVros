@@ -69,8 +69,10 @@ class uavCtrl
       CONTROL_FLY,
       LAND
     };
-    ControllerState controller_state = HOVER;//初始状态HOVER
-    ControllerState last_state = HOVER;//初始状态HOVER
+    ControllerState controller_state;//初始状态HOVER
+    ControllerState last_state;//初始状态HOVER
+    controller_state = HOVER;//不要在定义变量的时候就初始化
+    last_state = HOVER;
     mavros_msgs::State px4_state_;
     mavros_msgs::SetMode mode_cmd_;
 

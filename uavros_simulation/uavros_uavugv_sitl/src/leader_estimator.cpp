@@ -44,7 +44,7 @@ leaderEstimate::leaderEstimate(const ros::NodeHandle &nh, const ros::NodeHandle 
   leader_state_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("leader_pose_estimate", 10);
   leaderPath_pub_ = nh_.advertise<nav_msgs::Path>("trajectory/leader_traj", 1); //to rviz 
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.01), &leaderEstimate::cmdloop_cb, this);  // Define timer for constant loop rate  
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.05), &leaderEstimate::cmdloop_cb, this);  // Define timer for constant loop rate, 100Hz is too high and unnecessary  
   trajloop_timer_ = nh_.createTimer(ros::Duration(0.1), &leaderEstimate::trajloop_cb, this);  // Define timer for constant loop rate  
 
 
