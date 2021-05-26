@@ -10,7 +10,7 @@ material ARtag6/Image
 
               texture_unit
               {
-                texture ARtag6.png
+                texture ARtag6v2.png
               }
             }
           }
