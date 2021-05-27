@@ -103,6 +103,12 @@
         	<param name="init_x" value = "$(arg x_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->
         	<param name="init_y" value = "$(arg y_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->
 	</node>
+
+        <!-- gazebo ground truth position publisher -->
+	<node pkg="uavros_gazebo" type="gazebo_modelpos_publisher.py" name="gazebo_modelpos_publisher" output="screen">
+		<param name="modelname" value = "iris_1"/>
+		<param name="linkname" value = "base_link"/>
+	</node>
 </group>
 
 <group ns="$(arg ns2)">
@@ -197,6 +203,11 @@
     		<param name="landoverH_tag" value = "0.1"/> <!--0.1m-->	
         	<param name="init_x" value = "$(arg x_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->
         	<param name="init_y" value = "$(arg y_pos)"/><!--仿真用，飞机原点是起飞点和map原点不同-->				 
+	</node>
+        <!-- gazebo ground truth position publisher -->
+	<node pkg="uavros_gazebo" type="gazebo_modelpos_publisher.py" name="gazebo_modelpos_publisher" output="screen">
+		<param name="modelname" value = "iris_2"/>
+		<param name="linkname" value = "base_link"/>
 	</node>
 </group>
 

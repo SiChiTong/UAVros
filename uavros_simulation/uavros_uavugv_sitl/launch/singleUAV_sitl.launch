@@ -27,6 +27,11 @@
         <param name="alpha" value = "5"/>
         <param name="neighbor1_name" value = "ugv3"/>
     </node>
+
+	<node pkg="uavros_gazebo" type="gazebo_modelpos_publisher.py" name="gazebo_modelpos_publisher" output="screen">
+		<param name="modelname" value = "iris"/>
+		<param name="linkname" value = "base_link"/>
+	</node>
 </group>
   
   <arg name="visualization" default="true"/>

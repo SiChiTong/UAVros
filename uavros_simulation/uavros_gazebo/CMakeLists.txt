@@ -79,6 +79,7 @@ catkin_install_python(PROGRAMS
     py_nodes/get_ground_truth_formation.py  
     py_nodes/move_boxes.py
     py_nodes/get_ground_truth.py
+    py_nodes/gazebo_modelpos_publisher.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY models DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
