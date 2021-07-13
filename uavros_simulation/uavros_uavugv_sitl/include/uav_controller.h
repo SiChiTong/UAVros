@@ -71,8 +71,8 @@ class uavCtrl
     };
     ControllerState controller_state;//初始状态HOVER
     ControllerState last_state;//初始状态HOVER
-    controller_state = HOVER;//不要在定义变量的时候就初始化
-    last_state = HOVER;
+    //controller_state = HOVER;//不要在定义变量的时候就初始化
+    //last_state = HOVER; //也不要在头文件里初始化
     mavros_msgs::State px4_state_;
     mavros_msgs::SetMode mode_cmd_;
 

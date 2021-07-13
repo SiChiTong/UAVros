@@ -61,6 +61,8 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   hAcc_ << 0.0, 0.0, 0.0;
   command_ = 0;
   t1_start_ = 0;
+  controller_state = HOVER;
+  last_state = HOVER;
 }
 
 void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
