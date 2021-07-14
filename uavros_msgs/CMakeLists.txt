@@ -21,6 +21,7 @@ add_message_files(
   DIRECTORY msg
   FILES
   KcfDetectioninfo.msg
+  trackingState.msg
 )
 
 #add_action_files(
