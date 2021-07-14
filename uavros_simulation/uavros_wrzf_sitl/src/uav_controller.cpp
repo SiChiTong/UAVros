@@ -21,9 +21,10 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   //leaderposeSub_ = nh_.subscribe("leader_pose_estimate", 1, &uavCtrl::leaderpose_cb, this, ros::TransportHints().tcpNoDelay()); 
   //cmdSub_ = nh_.subscribe("/cmd", 1, &uavCtrl::cmd_cb, this, ros::TransportHints().tcpNoDelay()); 
   px4stateSub_ = nh_.subscribe("mavros/state", 1, &uavCtrl::px4state_cb, this, ros::TransportHints().tcpNoDelay());
+  gimbalSub_ = nh_.subscribe("/gimbal/gimbal_state", 1, &uavCtrl::gimbal_cb, this, ros::TransportHints().tcpNoDelay());
   jc_cmdSub_ = nh_.subscribe("/jc_cmd", 1, &uavCtrl::jc_cmd_cb, this, ros::TransportHints().tcpNoDelay());
   target_pose_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
-  en_track_pub_ = nh_.advertise<std_msgs::String>("gimbal/gimbal_en", 10);
+  en_track_pub_ = nh_.advertise<std_msgs::String>("gimbal/gimbal_cmd", 10);
 
   arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
   setMode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
@@ -57,11 +58,16 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   pidy.error_last = 0;
   pidy.integral = 0;
 
-  error_pE = 0;
-  error_pN = 0;
+  error_pE = 0.1;
+  error_pN = 0.1;
   VxyPz_sp_ << 0.0,0.0,0.0;
 
   yaw_sp_ = hover_yaw_;
+
+  gim_yaw_ = 0.0;
+  gim_pitch_ = 0.0;
+  gim_servo_state_ = "init";
+  gim_track_state_ = "init";
 
   controller_state = PREPARE;
   last_state = PREPARE;
@@ -83,13 +89,14 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     }
     else if(command_ != BLANK)
     {
-      cout << "warning: the jc2fk.txt content is not wait!";
+      cout << "warning: the jc2fk.txt content is not wait!" << endl;
     }
     last_state = PREPARE;
     cout << "PREPARE" << endl;
     break;
   
   case TAKEOFF:
+  //TODO: under 2m, continuing to trigger takeoff
     if(takeoff_triggered_ == false)
     {
       mode_cmd_.request.custom_mode = "AUTO.TAKEOFF";
@@ -151,10 +158,11 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     {
       controller_state = FINISH;
     }
-    //computeError();
+    //computeError(); TODO
     computeVelCmd(VxyPz_sp_, error_pE, error_pN);
     yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
     pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
+    //TODO: if lost the target, fly following other UAVs
 
     last_state = TRACK;
     cout << "TRACK" << endl;
@@ -174,67 +182,6 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     cout << "RETURN" << endl;
     break;
 
-/*
-  case CONTROL_FLY:
-    if (last_state == LAND)
-    {
-      controller_state = LAND;
-      last_state = LAND;
-      cout << "reject control_flying from LAND, keep LAND" << endl;
-      break;
-    }
-    if (last_state == HOVER)
-    {
-      t1_start_ = ros::Time::now().toSec();
-    }
-
-    t_ = ros::Time::now().toSec() - t1_start_ + t1_accum_;
-    double theta;
-    theta = h_omega_ * t_;
-    hPos_(0) = h_radius_ * cos(theta + h_phi_);
-    hPos_(1) = h_radius_ * sin(theta + h_phi_);
-    hVel_(0) = - h_radius_ * h_omega_* sin(theta + h_phi_);
-    hVel_(1) = h_radius_ * h_omega_* cos(theta + h_phi_);
-    hAcc_(0) = - h_radius_ * h_omega_* h_omega_ * cos(theta + h_phi_);
-    hAcc_(1) = - h_radius_ * h_omega_* h_omega_ * sin(theta + h_phi_);
-
-    computeAccCmd(acc_sp, leaderPos_ + hPos_, leaderVel_ + hVel_, leaderAcc_ + hAcc_); 
-    //compute acceleration setpoint command by PD controller algorithm;  
-    pubAccCmd(acc_sp);
-    last_state = CONTROL_FLY;
-    break; 
- 
-  case LAND:
-    //do not send setpoint command
-    if(last_state == CONTROL_FLY)
-    {
-      controller_state = HOVER;
-      last_state = CONTROL_FLY;
-      cout << "reject landing from CONTROL_FLY, switch to HOVER" << endl;
-    }
-    else if(last_state == HOVER)
-    {
-      std_srvs::SetBool land_service_cmd;
-      land_service_cmd.request.data = true;
-      if(precise_landing_client_.call(land_service_cmd))
-      {
-        last_state = LAND;
-        cout << "land service call is success," << endl;
-      }
-      else
-      {
-        controller_state = HOVER;
-        last_state = HOVER; 
-        cout << "land service call failed, switch to HOVER" << endl;
-      }
-    }
-    else
-    {
-      last_state = LAND; 
-      //if last state is land, do not call land service repeatedly
-    }
-    break;
-*/
   default:
     cout << "uav controller: error controller state!" << endl;
     break;
@@ -340,7 +287,7 @@ void uavCtrl::jc_cmd_cb(const std_msgs::Int32 &msg)
   int jc_cmd;
   jc_cmd = msg.data;
 	//cout << "uav controller receive command: " << jc_cmd << endl;
-  if(jc_cmd == 0) {}
+  if(jc_cmd == 0) {command_ = BLANK;}
   else if(jc_cmd == 1) {command_ = LAUNCH;}
   else if(jc_cmd == 2) {command_ = FLYUP;}
   else if(jc_cmd == 3) {command_ = TO_ONE;}
@@ -348,6 +295,14 @@ void uavCtrl::jc_cmd_cb(const std_msgs::Int32 &msg)
   else if(jc_cmd == 5) {command_ = TO_THREE;}
   else if(jc_cmd == 6) {command_ = RETURN;}
   else {command_ = BLANK; cout << "uav controller: unknown jc_cmd" << endl;}
+}
+
+void uavCtrl::gimbal_cb(const uavros_msgs::TrackState &msg)
+{
+  gim_servo_state_ = msg.servo_state;
+  gim_track_state_ = msg.track_state;
+  gim_yaw_ = msg.yaw;
+  gim_pitch_ = msg.pitch;
 }
 
 void uavCtrl::px4state_cb(const mavros_msgs::State &msg)

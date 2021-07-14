@@ -29,7 +29,7 @@
 #include <std_msgs/Int32.h>
 #include <std_msgs/String.h>
 #include <std_srvs/SetBool.h>
-
+#include "uavros_msgs/TrackState.h"
 
 
 using namespace std;
@@ -43,6 +43,7 @@ class uavCtrl
     ros::Subscriber mavposeSub_;
     ros::Subscriber mavtwistSub_;
     ros::Subscriber px4stateSub_;
+    ros::Subscriber gimbalSub_;
     ros::Subscriber jc_cmdSub_;
     ros::Publisher target_pose_pub_; 
     ros::Publisher en_track_pub_;   
@@ -62,6 +63,28 @@ class uavCtrl
     double car_initposx_, car_initposy_;
     double hover_yaw_;
     double yaw_sp_;
+
+    float gim_yaw_;
+    float gim_pitch_;
+    string gim_servo_state_;
+    string gim_track_state_;
+  /*
+    # STATE DICT
+    servo_state_dict = {
+        0x00: "CLOSED",
+        0x41: "MANUAL",
+        0x44: "POSITION",
+        0x66: "TRACK"
+    }
+
+    track_state_dict = {
+        0x00: "NoTarget",
+        0x01: "HaveTarget",
+        0x02: "Tracking",
+        0x03: "Missing"
+    }
+  */
+    
     bool takeoff_triggered_;
     bool offboard_triggered_;
     bool return_triggered_;
@@ -92,6 +115,7 @@ class uavCtrl
     mavros_msgs::State px4_state_;
     mavros_msgs::SetMode mode_cmd_;
     std_msgs::String string_msg_;
+    //uavros_msgs::TrackState gimbal_state_;
 
     typedef struct
     {
@@ -113,6 +137,7 @@ class uavCtrl
     
     void jc_cmd_cb(const std_msgs::Int32 &msg);
     void px4state_cb(const mavros_msgs::State &msg);
+    void gimbal_cb(const uavros_msgs::TrackState &msg);
 
     //void leaderpose_cb(const mavros_msgs::PositionTarget &msg);
     //void cmd_cb(const std_msgs::Int32 &msg);

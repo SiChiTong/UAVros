@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
     rostest
     std_msgs
     gazebo_msgs
-    prometheus_msgs
     message_generation
     geometry_msgs
     urdf

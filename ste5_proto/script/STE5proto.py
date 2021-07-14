@@ -17,8 +17,9 @@ servo_state_dict = {
 
 track_state_dict = {
     0x00: "NoTarget",
-    0x01: "Tracking",
-    0x02: "Missing"
+    0x01: "HaveTarget",
+    0x02: "Tracking",
+    0x03: "Missing"
 }
 # blue for can_h
 # yellow for can_l

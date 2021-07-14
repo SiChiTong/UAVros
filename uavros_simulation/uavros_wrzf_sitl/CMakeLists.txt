@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  uavros_msgs
 )
 
 #uncomment the following 4 lines to use the Eigen library

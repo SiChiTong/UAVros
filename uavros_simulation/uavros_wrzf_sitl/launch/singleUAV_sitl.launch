@@ -18,7 +18,7 @@
         <param name="hover_yaw_rad" value = "0.75"/>
     	<param name="Kp" value = "1.0"/>
         <param name="Kd" value = "0.0"/>
-        <param name="Ki" value = "0.0"/>
+        <param name="Ki" value = "0.1"/>
         <param name="vxy_max" value = "5.0"/>
         <param name="car_initposx" value = "3.0"/>
         <param name="car_initposy" value = "2.0"/>
