@@ -18,6 +18,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <Eigen/Eigenvalues>
+#include <Eigen/Core>
 
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/PositionTarget.h>
@@ -52,11 +53,14 @@ class uavCtrl
     Eigen::Vector4d mavAtt_;
     Eigen::Vector3d mavPos_, mavVel_;
     Eigen::Vector3d PxyPz_sp;
+    Eigen::Vector3d VxyPz_sp_;
 
     double arrive_alt_, track_alt_;
     double Kp_, Kd_, Ki_;
     double vxy_max_;
+    double error_pE, error_pN;
     double car_initposx_, car_initposy_;
+    double hover_yaw_;
     double yaw_sp_;
     bool takeoff_triggered_;
     bool offboard_triggered_;
@@ -89,21 +93,29 @@ class uavCtrl
     mavros_msgs::SetMode mode_cmd_;
     std_msgs::String string_msg_;
 
+    typedef struct
+    {
+      double error;  
+      double error_last; 
+      double derivative;	
+      double integral;     
+    } PID_ITEM;
+    PID_ITEM pidx;
+    PID_ITEM pidy;
     void cmdloop_cb(const ros::TimerEvent &event);
     void mavpose_cb(const geometry_msgs::PoseStamped &msg);
     void mavtwist_cb(const geometry_msgs::TwistStamped &msg);
 
-    void computeAccCmd(Eigen::Vector3d &acc_cmd, const Eigen::Vector3d &target_pos,
-                                       const Eigen::Vector3d &target_vel, const Eigen::Vector3d &target_acc);
+    void computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, const double &error_py);
     void pubPxyPzCmd(const Eigen::Vector3d &cmd_p);
     void pubPxyzYawCmd(const Eigen::Vector3d &cmd_p, const double &yaw_sp);
-    void pubVxyPzCmd(const Eigen::Vector3d &cmd_sp);
+    void pubVxyPzYawCmd(const Eigen::Vector3d &cmd_sp, const double &yaw_sp);
     
     void jc_cmd_cb(const std_msgs::Int32 &msg);
     void px4state_cb(const mavros_msgs::State &msg);
 
-    void leaderpose_cb(const mavros_msgs::PositionTarget &msg);
-    void cmd_cb(const std_msgs::Int32 &msg);
+    //void leaderpose_cb(const mavros_msgs::PositionTarget &msg);
+    //void cmd_cb(const std_msgs::Int32 &msg);
 
   public:
     uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private);

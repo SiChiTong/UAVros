@@ -33,7 +33,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
 
   nh_private_.param<double>("arrive_alt", arrive_alt_, 7.0);
   nh_private_.param<double>("track_alt", track_alt_, 5.0);
-  nh_private_.param<double>("hover_yaw_rad", yaw_sp_, 0.0);  
+  nh_private_.param<double>("hover_yaw_rad", hover_yaw_, 0.0);  
   nh_private_.param<double>("Kp", Kp_, 1.0);
   nh_private_.param<double>("Kd", Kd_, 0.0);
   nh_private_.param<double>("Ki", Ki_, 0.0);
@@ -47,9 +47,21 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   cout << "Kd: " << Kd_ << endl;
   cout << "Ki: " << Ki_ << endl;
   cout << "vxy_max: " << vxy_max_ << endl;
+
   takeoff_triggered_ = false;
   offboard_triggered_ = false;
   return_triggered_ = false;
+
+  pidx.error_last = 0;
+  pidx.integral = 0;
+  pidy.error_last = 0;
+  pidy.integral = 0;
+
+  error_pE = 0;
+  error_pN = 0;
+  VxyPz_sp_ << 0.0,0.0,0.0;
+
+  yaw_sp_ = hover_yaw_;
 
   controller_state = PREPARE;
   last_state = PREPARE;
@@ -121,14 +133,14 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     break;
 
   case HOVER_ON_CAR:
-    string_msg_.data = "OPEN";
-    en_track_pub_.publish(string_msg_); //open camera tracking
     PxyPz_sp << car_initposx_, car_initposy_, track_alt_;
-    //yaw_sp_ = 0.0; //TODO: calculate vertical to velocity or car heading
-    pubPxyzYawCmd(PxyPz_sp,yaw_sp_);
+    //hover_yaw_ = 0.0; //TODO: calculate vertical to velocity or car heading
+    pubPxyzYawCmd(PxyPz_sp,hover_yaw_);
     if((fabs(mavPos_(2)-track_alt_) < 0.3))
     {
       controller_state = TRACK;
+      string_msg_.data = "OPEN";
+      en_track_pub_.publish(string_msg_); //open camera tracking
     }
     last_state = HOVER_ON_CAR;
     cout << "HOVER_ON_CAR" << endl;
@@ -139,6 +151,11 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     {
       controller_state = FINISH;
     }
+    //computeError();
+    computeVelCmd(VxyPz_sp_, error_pE, error_pN);
+    yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
+    pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
+
     last_state = TRACK;
     cout << "TRACK" << endl;
     break;
@@ -186,7 +203,7 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     pubAccCmd(acc_sp);
     last_state = CONTROL_FLY;
     break; 
-
+ 
   case LAND:
     //do not send setpoint command
     if(last_state == CONTROL_FLY)
@@ -224,18 +241,28 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   }
 }
 
-/*
-void uavCtrl::computeAccCmd(Eigen::Vector3d &acc_cmd, const Eigen::Vector3d &target_pos,
-                                       const Eigen::Vector3d &target_vel, const Eigen::Vector3d &target_acc)
-{
-  const Eigen::Vector3d pos_error = target_pos - mavPos_;
-  const Eigen::Vector3d vel_error = target_vel - mavVel_;
 
-  acc_cmd = Kpos_.asDiagonal() * pos_error + Kvel_.asDiagonal() * vel_error + target_acc;
-  acc_cmd(0) = max(-axy_max_, min(axy_max_, acc_cmd(0)));
-  acc_cmd(1) = max(-axy_max_, min(axy_max_, acc_cmd(1)));
+void uavCtrl::computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, const double &error_py)
+{
+  pidx.error = error_px;
+  pidx.derivative = error_px - pidx.error_last;
+  pidx.integral += error_px;
+  pidx.integral = max(-vxy_max_*0.8, min(pidx.integral, vxy_max_*0.8));//saturation resist
+  pidx.error_last = error_px;
+  vxypz_sp(0) = Kp_*pidx.error + Kd_*pidx.derivative + Ki_*pidx.integral;
+  vxypz_sp(0) = max(-vxy_max_, min(vxy_max_, vxypz_sp(0)));
+
+  pidy.error = error_py;
+  pidy.derivative = error_py - pidy.error_last;
+  pidy.integral += error_py;
+  pidy.integral = max(-vxy_max_*0.8, min(pidy.integral, vxy_max_*0.8));//saturation resist
+  pidy.error_last = error_py;
+  vxypz_sp(1) = Kp_*pidy.error + Kd_*pidy.derivative + Ki_*pidy.integral;
+  vxypz_sp(1) = max(-vxy_max_, min(vxy_max_, vxypz_sp(1)));
+
+  vxypz_sp(2) = track_alt_;
 }
-*/
+
 void uavCtrl::pubPxyPzCmd(const Eigen::Vector3d &cmd_p)
 {
   mavros_msgs::PositionTarget msg;
@@ -261,16 +288,17 @@ void uavCtrl::pubPxyzYawCmd(const Eigen::Vector3d &cmd_p, const double &yaw_sp)
   target_pose_pub_.publish(msg);
 }
 
-void uavCtrl::pubVxyPzCmd(const Eigen::Vector3d &cmd_sp)
+void uavCtrl::pubVxyPzYawCmd(const Eigen::Vector3d &cmd_sp, const double &yaw_sp)
 {
   mavros_msgs::PositionTarget msg;
   msg.header.stamp = ros::Time::now();
   msg.coordinate_frame = 1; //pub in ENU local frame;
-  msg.type_mask = 0b110111000011; // pub vx+vy+vz+pz, vz is feedforward vel. Ignore yaw and yaw rate
+  msg.type_mask = 0b100111000011; // pub vx+vy+vz+pz, vz is feedforward vel. Ignore yaw and yaw rate
   msg.velocity.x = cmd_sp(0); //pub vx
   msg.velocity.y = cmd_sp(1); //pub vy
   msg.velocity.z = 0; //pub vz
   msg.position.z = cmd_sp(2); // pub local z altitude setpoint
+  msg.yaw = yaw_sp;
   target_pose_pub_.publish(msg);
 }
 
