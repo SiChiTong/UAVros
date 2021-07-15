@@ -31,6 +31,9 @@
 #include <std_srvs/SetBool.h>
 #include "uavros_msgs/TrackState.h"
 
+#include <dynamic_reconfigure/server.h>
+//#include <uavros_wrzf_sitl/dynamicConfig.h>
+
 
 using namespace std;
 using namespace Eigen;
@@ -59,7 +62,7 @@ class uavCtrl
     double arrive_alt_, track_alt_;
     double Kp_, Kd_, Ki_;
     double vxy_max_;
-    double error_pE, error_pN;
+    double error_pE_, error_pN_;
     double car_initposx_, car_initposy_;
     double hover_yaw_;
     double yaw_sp_;
@@ -131,9 +134,12 @@ class uavCtrl
     void mavtwist_cb(const geometry_msgs::TwistStamped &msg);
 
     void computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, const double &error_py);
+    void computeError(const float &yaw, const float &pitch,
+              const Eigen::Vector4d &uavatt, const Eigen::Vector3d &uavpos);
     void pubPxyPzCmd(const Eigen::Vector3d &cmd_p);
     void pubPxyzYawCmd(const Eigen::Vector3d &cmd_p, const double &yaw_sp);
     void pubVxyPzYawCmd(const Eigen::Vector3d &cmd_sp, const double &yaw_sp);
+    void pubVxyPzCmd(const Eigen::Vector3d &cmd_sp);
     
     void jc_cmd_cb(const std_msgs::Int32 &msg);
     void px4state_cb(const mavros_msgs::State &msg);
@@ -143,7 +149,9 @@ class uavCtrl
     //void cmd_cb(const std_msgs::Int32 &msg);
 
   public:
+    //void dynamic_callback(const uavros_wrzf_sitl::dynamicConfig &config);
     uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private);
+    //virtual ~uavCtrl();
     
 };
 

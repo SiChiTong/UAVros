@@ -30,15 +30,12 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   setMode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
   //precise_landing_client_ = nh_.serviceClient<std_srvs::SetBool>("precise_landing");
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.05), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
 
   nh_private_.param<double>("arrive_alt", arrive_alt_, 7.0);
   nh_private_.param<double>("track_alt", track_alt_, 5.0);
   nh_private_.param<double>("hover_yaw_rad", hover_yaw_, 0.0);  
-  nh_private_.param<double>("Kp", Kp_, 1.0);
-  nh_private_.param<double>("Kd", Kd_, 0.0);
-  nh_private_.param<double>("Ki", Ki_, 0.0);
-  nh_private_.param<double>("vxy_max", vxy_max_, 5.0);
+  nh_private_.param<double>("vxy_max", vxy_max_, 4.0);
   nh_private_.param<double>("car_initposx", car_initposx_, 1.0);
   nh_private_.param<double>("car_initposy", car_initposy_, 1.0);
   
@@ -49,6 +46,9 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   cout << "Ki: " << Ki_ << endl;
   cout << "vxy_max: " << vxy_max_ << endl;
 
+  Kp_ = 0.0;
+  Ki_ = 0.0;
+  Kd_ = 0.0;
   takeoff_triggered_ = false;
   offboard_triggered_ = false;
   return_triggered_ = false;
@@ -58,9 +58,9 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   pidy.error_last = 0;
   pidy.integral = 0;
 
-  error_pE = 0.1;
-  error_pN = 0.1;
-  VxyPz_sp_ << 0.0,0.0,0.0;
+  error_pE_ = 0.1;
+  error_pN_ = 0.1;
+  VxyPz_sp_ << 0.0,0.0,track_alt_;
 
   yaw_sp_ = hover_yaw_;
 
@@ -81,15 +81,19 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   case PREPARE: //waiting and initilizing
     //VxyPz_sp << 0.0, 0.0, alt_sp;
     //pubVxyPzCmd(VxyPz_sp);
-    string_msg_.data = "CLOSE"; //close camera tracking
-    en_track_pub_.publish(string_msg_);
+    if(gim_servo_state_ == "TRACK")
+    {
+      string_msg_.data = "CLOSE"; //close camera tracking
+      en_track_pub_.publish(string_msg_);
+    }
     if (command_ == LAUNCH)
     {
       controller_state = TAKEOFF;
+      //controller_state = TRACK;
     }
     else if(command_ != BLANK)
     {
-      cout << "warning: the jc2fk.txt content is not wait!" << endl;
+      cout << "warning: the jc2fk.txt content is not correct!" << endl;
     }
     last_state = PREPARE;
     cout << "PREPARE" << endl;
@@ -97,6 +101,7 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   
   case TAKEOFF:
   //TODO: under 2m, continuing to trigger takeoff
+  /*
     if(takeoff_triggered_ == false)
     {
       mode_cmd_.request.custom_mode = "AUTO.TAKEOFF";
@@ -110,11 +115,17 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
         cout << "takeoff trigger fail,arm first" << endl;
       }
     }
-    else
+  */
+    if ((px4_state_.mode != "AUTO.TAKEOFF")&&(mavPos_(2) < 2.0))
     {
-      if ((px4_state_.mode != "AUTO.TAKEOFF")&&(mavPos_(2) > 2.0))
-      {controller_state = FLYTOCAR;}
-    }    
+      mode_cmd_.request.custom_mode = "AUTO.TAKEOFF";
+      setMode_client_.call(mode_cmd_);
+    }
+    if ((px4_state_.mode != "AUTO.TAKEOFF")&&(mavPos_(2) > 2.0))
+    {
+      controller_state = FLYTOCAR;
+      cout << "FLYTOCAR" << endl;
+    }  
     last_state = TAKEOFF;
     cout << "TAKEOFF" << endl;
     break;
@@ -134,9 +145,10 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     if( (fabs(mavPos_(0)-car_initposx_) < 0.2) && (fabs(mavPos_(1)-car_initposy_) < 0.2) )
     {
       controller_state = HOVER_ON_CAR;
+      cout << "HOVER_ON_CAR" << endl;
     }
     last_state = FLYTOCAR;
-    cout << "FLYTOCAR" << endl;
+    //cout << "FLYTOCAR" << endl;
     break;
 
   case HOVER_ON_CAR:
@@ -146,26 +158,53 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     if((fabs(mavPos_(2)-track_alt_) < 0.3))
     {
       controller_state = TRACK;
-      string_msg_.data = "OPEN";
-      en_track_pub_.publish(string_msg_); //open camera tracking
+      cout << "TRACK" << endl;
+      //string_msg_.data = "OPEN";
+      //en_track_pub_.publish(string_msg_); //open camera tracking
     }
     last_state = HOVER_ON_CAR;
-    cout << "HOVER_ON_CAR" << endl;
+    //cout << "HOVER_ON_CAR" << endl;
     break;
 
   case TRACK:
+    if(px4_state_.mode != "OFFBOARD")
+    {
+      pidx.integral = 0.0;
+      pidy.integral = 0.0;
+      VxyPz_sp_ << 0.0,0.0,track_alt_;
+      string_msg_.data = "CLOSE";
+      en_track_pub_.publish(string_msg_); //close camera tracking
+      cout << "CLOSE CAMERA TRACK"<< endl;
+    }
+    else //offboard
+    {
+      if((gim_servo_state_ != "TRACK")&&(gim_track_state_ == "HaveTarget"))
+      {
+        string_msg_.data = "OPEN";
+        en_track_pub_.publish(string_msg_); //open camera tracking
+        cout << "OPEN CAMERA TRACK"<< endl;
+      }
+      if((gim_servo_state_ == "TRACK")&&(gim_track_state_ != "Missing"))
+      {
+        computeError(gim_yaw_, gim_pitch_, mavAtt_, mavPos_); //compute error_pE_,error_pN_
+        cout << "error_pE_: " << error_pE_ << ", error_pN_: " << error_pN_ << endl;
+        computeVelCmd(VxyPz_sp_, error_pE_, error_pN_); //compute VxyPz_sp_
+      }
+    }
+    yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
+    //pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
+    pubVxyPzCmd(VxyPz_sp_);
+
+    //TODO: if lost the target, fly following other UAVs
+ 
     if (command_ == RETURN)
     {
       controller_state = FINISH;
+      cout << "RETURN" << endl;
     }
-    //computeError(); TODO
-    computeVelCmd(VxyPz_sp_, error_pE, error_pN);
-    yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
-    pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
-    //TODO: if lost the target, fly following other UAVs
-
+    //TODO: if exceed 6min, atuo return
     last_state = TRACK;
-    cout << "TRACK" << endl;
+    //cout << "TRACK" << endl;
     break;
 
   case FINISH:
@@ -210,6 +249,24 @@ void uavCtrl::computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, c
   vxypz_sp(2) = track_alt_;
 }
 
+void uavCtrl::computeError(const float &yaw, const float &pitch,
+              const Eigen::Vector4d &uavatt, const Eigen::Vector3d &uavpos)
+{
+  Eigen::Vector3d campose_FLU, campose_ENU;
+  campose_FLU << -cos(yaw)*sin(pitch), -sin(yaw), -cos(yaw)*cos(pitch); //in FLU body frame
+  //yaw y, pitch z. out z, in y. y back, z left
+  float qw = uavatt(0);
+  float qx = uavatt(1);
+  float qy = uavatt(2);
+  float qz = uavatt(3);
+  float height = uavpos(2);
+  Eigen::Quaterniond q(qw,qx,qy,qz);
+  Eigen::Matrix3d Rib = q.toRotationMatrix();
+  campose_ENU = Rib*campose_FLU; //in ENU frame
+  error_pE_ = fabs(height)/campose_ENU(2)*campose_ENU(0);
+  error_pN_ = fabs(height)/campose_ENU(2)*campose_ENU(1);
+}
+
 void uavCtrl::pubPxyPzCmd(const Eigen::Vector3d &cmd_p)
 {
   mavros_msgs::PositionTarget msg;
@@ -240,12 +297,25 @@ void uavCtrl::pubVxyPzYawCmd(const Eigen::Vector3d &cmd_sp, const double &yaw_sp
   mavros_msgs::PositionTarget msg;
   msg.header.stamp = ros::Time::now();
   msg.coordinate_frame = 1; //pub in ENU local frame;
-  msg.type_mask = 0b100111000011; // pub vx+vy+vz+pz, vz is feedforward vel. Ignore yaw and yaw rate
+  msg.type_mask = 0b100111000011; // pub vx+vy+vz+pz+yaw, vz is feedforward vel.
   msg.velocity.x = cmd_sp(0); //pub vx
   msg.velocity.y = cmd_sp(1); //pub vy
   msg.velocity.z = 0; //pub vz
   msg.position.z = cmd_sp(2); // pub local z altitude setpoint
   msg.yaw = yaw_sp;
+  target_pose_pub_.publish(msg);
+}
+
+void uavCtrl::pubVxyPzCmd(const Eigen::Vector3d &cmd_sp)
+{
+  mavros_msgs::PositionTarget msg;
+  msg.header.stamp = ros::Time::now();
+  msg.coordinate_frame = 1; //pub in ENU local frame;
+  msg.type_mask = 0b110111000011; // pub vx+vy+vz+pz, vz is feedforward vel. Ignore yaw and yaw rate
+  msg.velocity.x = cmd_sp(0); //pub vx
+  msg.velocity.y = cmd_sp(1); //pub vy
+  msg.velocity.z = 0; //pub vz
+  msg.position.z = cmd_sp(2); // pub local z altitude setpoint
   target_pose_pub_.publish(msg);
 }
 
@@ -309,3 +379,12 @@ void uavCtrl::px4state_cb(const mavros_msgs::State &msg)
 {
 	px4_state_ = msg;
 }
+
+/*
+void uavCtrl::dynamic_callback(const uavros_wrzf_sitl::dynamicConfig &config)
+{
+  Kp_ = config.P;
+  Ki_ = config.I;
+  Kd_ = config.D;
+}
+*/

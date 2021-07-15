@@ -8,6 +8,7 @@ project(uavros_wrzf_sitl)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
   roscpp
   rospy
   std_msgs
@@ -100,6 +101,13 @@ add_definitions(${EIGEN_DEFINITIONS})
 #   cfg/DynReconf2.cfg
 # )
 
+
+#generate_dynamic_reconfigure_options(
+#  cfg/fk_PID.cfg
+#)
+
+
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -141,9 +149,6 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/uavros_wrzf_sitl_node.cpp)
-add_executable(uav_controller_node 
-                  src/uav_controller_node.cpp
-                  src/uav_controller.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,11 +160,21 @@ add_executable(uav_controller_node
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+
+
+add_executable(uav_controller_node 
+                  src/uav_controller_node.cpp
+                  src/uav_controller.cpp)
+
+#add_dependencies(uav_controller_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(uav_controller_node ${catkin_LIBRARIES})
+
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(uav_controller_node ${catkin_LIBRARIES})
+
 
 #############
 ## Install ##
