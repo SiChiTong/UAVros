@@ -13,10 +13,13 @@
 
 
     <node pkg="uavros_wrzf_sitl" type="uav_controller_node" name="uav_controller" output="screen">
-        <param name="arrive_alt" value = "10.0"/>
+        <param name="arrive_alt" value = "7.0"/>
         <param name="track_alt" value = "5.0"/>
         <param name="hover_yaw_rad" value = "0.75"/>
-        <param name="vxy_max" value = "5.0"/>
+        <param name="vxy_max" value = "4.5"/>
+        <param name="Kp" value = "1.0"/>
+        <param name="Ki" value = "0.05"/>
+        <param name="Kd" value = "0.0"/>
         <param name="car_initposx" value = "3.0"/>
         <param name="car_initposy" value = "2.0"/>
     </node>
@@ -25,7 +28,7 @@
 	<param name="txt_filepath" value = "$(find uavros_wrzf_sitl)/script/jc2fk.txt"/>
     </node>
 
-  <arg name="pid_gui" default="true"/>
+  <arg name="pid_gui" default="false"/>
   <group if="$(arg pid_gui)">
     <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" />
   </group>

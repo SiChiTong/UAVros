@@ -36,6 +36,9 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   nh_private_.param<double>("track_alt", track_alt_, 5.0);
   nh_private_.param<double>("hover_yaw_rad", hover_yaw_, 0.0);  
   nh_private_.param<double>("vxy_max", vxy_max_, 4.0);
+  nh_private_.param<double>("Kp", Kp_, 1.0);
+  nh_private_.param<double>("Ki", Ki_, 0.0);
+  nh_private_.param<double>("Kd", Kd_, 0.0);
   nh_private_.param<double>("car_initposx", car_initposx_, 1.0);
   nh_private_.param<double>("car_initposy", car_initposy_, 1.0);
   
@@ -46,9 +49,6 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   cout << "Ki: " << Ki_ << endl;
   cout << "vxy_max: " << vxy_max_ << endl;
 
-  Kp_ = 0.0;
-  Ki_ = 0.0;
-  Kd_ = 0.0;
   takeoff_triggered_ = false;
   offboard_triggered_ = false;
   return_triggered_ = false;
@@ -86,15 +86,20 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
       string_msg_.data = "CLOSE"; //close camera tracking
       en_track_pub_.publish(string_msg_);
     }
+    if(command_ != BLANK)
+    {
+      cout << "warning: the jc2fk.txt content is not wait!" << endl;
+    }
     if (command_ == LAUNCH)
     {
-      controller_state = TAKEOFF;
-      //controller_state = TRACK;
+      //controller_state = TAKEOFF;
+      //cout << "TAKEOFF" << endl;
+      controller_state = TRACK; //just for test,straight to track mode
+      cout << "TRACK" << endl; //just for test,straight to track mode
+
+      break;
     }
-    else if(command_ != BLANK)
-    {
-      cout << "warning: the jc2fk.txt content is not correct!" << endl;
-    }
+
     last_state = PREPARE;
     cout << "PREPARE" << endl;
     break;
@@ -125,6 +130,7 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     {
       controller_state = FLYTOCAR;
       cout << "FLYTOCAR" << endl;
+      break;
     }  
     last_state = TAKEOFF;
     cout << "TAKEOFF" << endl;
@@ -190,13 +196,12 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
         cout << "error_pE_: " << error_pE_ << ", error_pN_: " << error_pN_ << endl;
         computeVelCmd(VxyPz_sp_, error_pE_, error_pN_); //compute VxyPz_sp_
       }
+	//TODO: if missing target for too long, fly following other UAVs
     }
     yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
     //pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
     pubVxyPzCmd(VxyPz_sp_);
 
-    //TODO: if lost the target, fly following other UAVs
- 
     if (command_ == RETURN)
     {
       controller_state = FINISH;
@@ -263,8 +268,8 @@ void uavCtrl::computeError(const float &yaw, const float &pitch,
   Eigen::Quaterniond q(qw,qx,qy,qz);
   Eigen::Matrix3d Rib = q.toRotationMatrix();
   campose_ENU = Rib*campose_FLU; //in ENU frame
-  error_pE_ = fabs(height)/campose_ENU(2)*campose_ENU(0);
-  error_pN_ = fabs(height)/campose_ENU(2)*campose_ENU(1);
+  error_pE_ = height/fabs(campose_ENU(2))*campose_ENU(0);
+  error_pN_ = height/fabs(campose_ENU(2))*campose_ENU(1);
 }
 
 void uavCtrl::pubPxyPzCmd(const Eigen::Vector3d &cmd_p)
