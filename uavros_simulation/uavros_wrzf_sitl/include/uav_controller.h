@@ -30,7 +30,8 @@
 #include <std_msgs/String.h>
 #include <std_srvs/SetBool.h>
 #include "uavros_msgs/TrackState.h"
-
+#include <geometry_msgs/Point.h>
+#include <geometry_msgs/Quaternion.h>
 #include <dynamic_reconfigure/server.h>
 //#include <uavros_wrzf_sitl/dynamicConfig.h>
 
@@ -53,6 +54,7 @@ class uavCtrl
     ros::ServiceClient arming_client_;
     ros::ServiceClient setMode_client_;
     ros::Timer cmdloop_timer_;
+    ros::Subscriber target_err_Sub_;
 
     Eigen::Vector4d mavAtt_;
     Eigen::Vector3d mavPos_, mavVel_;
@@ -71,6 +73,10 @@ class uavCtrl
     float gim_pitch_;
     string gim_servo_state_;
     string gim_track_state_;
+    float target_err_x;
+    float target_err_y;
+    int flag;
+    float heading_;
   /*
     # STATE DICT
     servo_state_dict = {
@@ -144,6 +150,9 @@ class uavCtrl
     void jc_cmd_cb(const std_msgs::Int32 &msg);
     void px4state_cb(const mavros_msgs::State &msg);
     void gimbal_cb(const uavros_msgs::TrackState &msg);
+
+    void targetCallback(const geometry_msgs::Quaternion&msg);
+    void pub_body_VxyPzCmd(const Eigen::Vector3d &cmd_sp);
 
     //void leaderpose_cb(const mavros_msgs::PositionTarget &msg);
     //void cmd_cb(const std_msgs::Int32 &msg);

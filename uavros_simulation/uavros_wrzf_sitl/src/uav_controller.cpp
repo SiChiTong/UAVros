@@ -28,6 +28,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
 
   arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
   setMode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
+  target_err_Sub_ = nh_.subscribe("target_angle",10,&uavCtrl::targetCallback,this,ros::TransportHints().tcpNoDelay());
   //precise_landing_client_ = nh_.serviceClient<std_srvs::SetBool>("precise_landing");
 
   cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
@@ -72,6 +73,10 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   controller_state = PREPARE;
   last_state = PREPARE;
   command_ = BLANK;
+  target_err_x = 0;
+  target_err_y = 0;
+  flag = 0;
+  heading_ = 0;
 }
 
 void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
@@ -81,11 +86,11 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   case PREPARE: //waiting and initilizing
     //VxyPz_sp << 0.0, 0.0, alt_sp;
     //pubVxyPzCmd(VxyPz_sp);
-    if(gim_servo_state_ == "TRACK")
-    {
-      string_msg_.data = "CLOSE"; //close camera tracking
-      en_track_pub_.publish(string_msg_);
-    }
+    //if(gim_servo_state_ == "TRACK")
+    //{
+      //string_msg_.data = "CLOSE"; //close camera tracking
+      //en_track_pub_.publish(string_msg_);
+    //}
     if(command_ != BLANK)
     {
       cout << "warning: the jc2fk.txt content is not wait!" << endl;
@@ -173,30 +178,41 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     break;
 
   case TRACK:
+    cout<<"TRACK"<<endl;
     if(px4_state_.mode != "OFFBOARD")
     {
       pidx.integral = 0.0;
       pidy.integral = 0.0;
       VxyPz_sp_ << 0.0,0.0,track_alt_;
-      string_msg_.data = "CLOSE";
-      en_track_pub_.publish(string_msg_); //close camera tracking
-      cout << "CLOSE CAMERA TRACK"<< endl;
+      cout<<"WAITING OFFBOARD!"<<endl;
+      //string_msg_.data = "CLOSE";
+      //en_track_pub_.publish(string_msg_); //close camera tracking
+      //cout << "CLOSE CAMERA TRACK"<< endl;
     }
     else //offboard
     {
-      if((gim_servo_state_ != "TRACK")&&(gim_track_state_ == "HaveTarget"))
+      if(flag = 0)
       {
-        string_msg_.data = "OPEN";
-        en_track_pub_.publish(string_msg_); //open camera tracking
-        cout << "OPEN CAMERA TRACK"<< endl;
+        cout << "LOST!"<< endl;
       }
-      if((gim_servo_state_ == "TRACK")&&(gim_track_state_ != "Missing"))
+      else
       {
-        computeError(gim_yaw_, gim_pitch_, mavAtt_, mavPos_); //compute error_pE_,error_pN_
-        cout << "error_pE_: " << error_pE_ << ", error_pN_: " << error_pN_ << endl;
-        computeVelCmd(VxyPz_sp_, error_pE_, error_pN_); //compute VxyPz_sp_
+        computeVelCmd(VxyPz_sp_, target_err_x, target_err_y);
+        cout << "x"<<target_err_x<<"y"<<target_err_y<< endl;
       }
-	//TODO: if missing target for too long, fly following other UAVs
+      //if((gim_servo_state_ != "TRACK")&&(gim_track_state_ == "HaveTarget"))
+      //{
+        //string_msg_.data = "OPEN";
+        //en_track_pub_.publish(string_msg_); //open camera tracking
+        //cout << "OPEN CAMERA TRACK"<< endl;
+      //}
+      //if((gim_servo_state_ == "TRACK")&&(gim_track_state_ != "Missing"))
+      //{
+        //computeError(gim_yaw_, gim_pitch_, mavAtt_, mavPos_); //compute error_pE_,error_pN_
+        //cout << "error_pE_: " << error_pE_ << ", error_pN_: " << error_pN_ << endl;
+        //computeVelCmd(VxyPz_sp_, error_pE_, error_pN_); //compute VxyPz_sp_
+      //}
+	   //TODO: if missing target for too long, fly following other UAVs
     }
     yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
     //pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
@@ -324,15 +340,35 @@ void uavCtrl::pubVxyPzCmd(const Eigen::Vector3d &cmd_sp)
   target_pose_pub_.publish(msg);
 }
 
+void uavCtrl::pub_body_VxyPzCmd(const Eigen::Vector3d &cmd_sp)
+{
+  mavros_msgs::PositionTarget msg;
+  msg.header.stamp = ros::Time::now();
+  msg.coordinate_frame = 8; //pub in body local frame;
+  msg.type_mask = 0b110111000011; // pub vx+vy+vz+pz, vz is feedforward vel. Ignore yaw and yaw rate
+  msg.velocity.x = cmd_sp(0); //pub vx
+  msg.velocity.y = cmd_sp(1); //pub vy
+  msg.velocity.z = 0; //pub vz
+  msg.position.z = cmd_sp(2); // pub local z altitude setpoint
+  target_pose_pub_.publish(msg);
+}
+
 void uavCtrl::mavpose_cb(const geometry_msgs::PoseStamped &msg)
 {
   mavPos_(0) = msg.pose.position.x;
   mavPos_(1) = msg.pose.position.y;
   mavPos_(2) = msg.pose.position.z;
-  mavAtt_(0) = msg.pose.orientation.w;
-  mavAtt_(1) = msg.pose.orientation.x;
-  mavAtt_(2) = msg.pose.orientation.y;
-  mavAtt_(3) = msg.pose.orientation.z;
+  mavAtt_(0) = msg.pose.orientation.x;
+  mavAtt_(1) = msg.pose.orientation.y;
+  mavAtt_(2) = msg.pose.orientation.z;
+  mavAtt_(3) = msg.pose.orientation.w;//顺序
+  Eigen::Quaterniond quaternion(mavAtt_);
+  Eigen::Vector3d eulerAngle = quaternion.matrix().eulerAngles(2,1,0);
+  if (abs(eulerAngle(1)) > 3) //pitch should be within (-pi/2,pi/2)
+    heading_ = eulerAngle(0) - M_PI;
+  else
+    heading_ = eulerAngle(0);
+    //cout<<heading_<<endl;
 }
 
 void uavCtrl::mavtwist_cb(const geometry_msgs::TwistStamped &msg)
@@ -370,6 +406,23 @@ void uavCtrl::jc_cmd_cb(const std_msgs::Int32 &msg)
   else if(jc_cmd == 5) {command_ = TO_THREE;}
   else if(jc_cmd == 6) {command_ = RETURN;}
   else {command_ = BLANK; cout << "uav controller: unknown jc_cmd" << endl;}
+}
+
+void uavCtrl::targetCallback(const geometry_msgs::Quaternion&msg)
+{
+	//cout<<msg<<endl;
+  float err_f;
+  float err_l;
+  err_f = tan(msg.x/57.3) * mavPos_(2);//msg.x is f angle
+	err_l = tan(msg.y/57.3) * mavPos_(2);//y
+  //cout<<"height:"<<mavPos_(2)<<endl;
+  //cout<<"err_f:  "<<err_f<<"err_l:  "<<err_l<<endl;
+  target_err_x = err_f *cos(heading_)-err_l*sin(heading_);//east error
+  target_err_y = err_f*sin(heading_)+err_l*cos(heading_);
+  //target_err_x = tan(msg.x/57.3) * mavPos_(2);
+	//target_err_y = tan(msg.y/57.3) * mavPos_(2);
+  //cout<<"target_err_x: "<<target_err_x<<" target_err_y: "<<target_err_y<<endl;
+	flag = msg.w;
 }
 
 void uavCtrl::gimbal_cb(const uavros_msgs::TrackState &msg)

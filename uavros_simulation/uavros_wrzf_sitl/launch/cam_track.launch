@@ -1,0 +1,45 @@
+<launch>
+
+    <node pkg="uavros_wrzf_sitl" type="uav_controller_node" name="uav_controller" output="screen">
+        <param name="arrive_alt" value = "7.0"/>
+        <param name="track_alt" value = "6.0"/>
+        <param name="hover_yaw_rad" value = "0.75"/>
+        <param name="vxy_max" value = "0.5"/>
+        <param name="Kp" value = "0.5"/>
+        <param name="Ki" value = "0.0"/>
+        <param name="Kd" value = "0.0"/>
+        <param name="car_initposx" value = "3.0"/>
+        <param name="car_initposy" value = "2.0"/>
+    </node>
+
+    <node pkg="uavros_wrzf_sitl" type="message_jc2fk.py" name="message_jc2fk" output="screen">
+	<param name="txt_filepath" value = "$(find uavros_wrzf_sitl)/script/jc2fk.txt"/>
+    </node>
+
+    <arg name="uavID" value="5"/>
+	<!-- mavros node -->
+	<include file="$(find mavros)/launch/node.launch">
+		<arg name="pluginlists_yaml" value="$(find mavros)/launch/px4_pluginlists.yaml" />
+		<arg name="config_yaml" value="$(find mavros)/launch/px4_config.yaml" />
+
+		<arg name="fcu_url" value="/dev/ttyTHS2:921600" />
+		<arg name="gcs_url" value="" />
+		<arg name="tgt_system" value="$(arg uavID)" />
+		<arg name="tgt_component" value="1" />
+		<arg name="log_output" value="screen" />
+		<arg name="fcu_protocol" value="v2.0" />
+		<arg name="respawn_mavros" default="false" />
+	</include>
+
+
+  <arg name="pid_gui" default="false"/>
+  <group if="$(arg pid_gui)">
+    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure" output="screen" />
+  </group>
+
+  <arg name="visualization" default="false"/>
+  <group if="$(arg visualization)">
+      <node type="rviz" name="rviz" pkg="rviz" args="-d $(find uavros_uavugv_sitl)/config/rviz_single.rviz" />
+  </group>
+
+</launch>
