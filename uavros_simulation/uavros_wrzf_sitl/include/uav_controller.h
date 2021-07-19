@@ -60,10 +60,12 @@ class uavCtrl
     Eigen::Vector3d mavPos_, mavVel_;
     Eigen::Vector3d PxyPz_sp;
     Eigen::Vector3d VxyPz_sp_;
+    Eigen::Vector3d VxyPz_sp_tmp_;
 
     double arrive_alt_, track_alt_;
     double Kp_, Kd_, Ki_;
     double vxy_max_;
+    double acc_max_;
     double error_pE_, error_pN_;
     double car_initposx_, car_initposy_;
     double hover_yaw_;
@@ -153,6 +155,7 @@ class uavCtrl
 
     void targetCallback(const geometry_msgs::Quaternion&msg);
     void pub_body_VxyPzCmd(const Eigen::Vector3d &cmd_sp);
+    void AccLimit(Eigen::Vector3d &cmd_sp);
 
     //void leaderpose_cb(const mavros_msgs::PositionTarget &msg);
     //void cmd_cb(const std_msgs::Int32 &msg);

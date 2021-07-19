@@ -4,8 +4,9 @@
         <param name="arrive_alt" value = "7.0"/>
         <param name="track_alt" value = "6.0"/>
         <param name="hover_yaw_rad" value = "0.75"/>
-        <param name="vxy_max" value = "0.5"/>
-        <param name="Kp" value = "0.5"/>
+        <param name="vxy_max" value = "3"/>
+        <param name="acc_max" value = "1"/>
+        <param name="Kp" value = "1"/>
         <param name="Ki" value = "0.0"/>
         <param name="Kd" value = "0.0"/>
         <param name="car_initposx" value = "3.0"/>

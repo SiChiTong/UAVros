@@ -10,6 +10,7 @@ from cir2_sitl import findcir
 import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point
+from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -19,7 +20,7 @@ def car_tracking():
     rospy.init_node('car_tracking', anonymous=True)
     # 创建一个Publisher，发布名为/turtle1/cmd_vel的topic，消息类型为geometry_msgs::Twist，队列长度10
     rospy.Subscriber('/iris/usb_cam/image_raw', Image, image_callback)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(20)
     while not rospy.is_shutdown():
         rate.sleep()
     '''
@@ -62,16 +63,17 @@ def car_tracking():
         '''
 
 def image_callback(imgmsg):
-    target_angle_pub = rospy.Publisher('/target_angle', Point, queue_size=1)
+    # target_angle_pub = rospy.Publisher('/target_angle', Point, queue_size=1)
+    target_angle_pub = rospy.Publisher('/target_angle', Quaternion, queue_size=1)
     bridge = CvBridge()  # Cvbridge can change between ROS image topic and cv frame format!
     target_angle = Point()
+    Dx = 0
+    Dy = 0
     try:
         frame = bridge.imgmsg_to_cv2(imgmsg, "bgr8")
         a1 = frame.shape[0]  # 高
         b1 = frame.shape[1]  # 宽
-        target_angle = Point()
-        Dx = 0
-        Dy = 0
+        target_angle = Quaternion()
         # greeen = (0, 255, 0)
         flag, rect = findcir(frame)
         if flag:
@@ -81,7 +83,8 @@ def image_callback(imgmsg):
             print('LOST!')
         target_angle.x = Dy
         target_angle.y = - Dx
-        target_angle.z = flag
+        target_angle.z = 0
+        target_angle.w = flag
         target_angle_pub.publish(target_angle)
         # 发布消息
         print(target_angle)

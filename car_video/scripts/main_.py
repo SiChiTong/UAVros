@@ -12,6 +12,7 @@ from detecting.detect_car import CarDetector
 import rospy
 from geometry_msgs.msg import Quaternion
 import math
+import time
 # from tracking import
 
 
@@ -23,7 +24,7 @@ def main():
     vc.set(3, 1280)  # 设置分辨率
     vc.set(4, 720)
     success, frame = vc.read()
-    car_detector = CarDetector()
+    car_detector = CarDetector(lightness_thr=200, lower_bound=1.0, upper_bound=2.6, area_thr=0.0049)
     while not success:
         print("camera ERROR!")
         time.sleep(1)

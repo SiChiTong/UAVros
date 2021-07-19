@@ -20,7 +20,8 @@
         <param name="track_alt" value = "6.0"/>
         <param name="hover_yaw_rad" value = "0.75"/>
         <param name="vxy_max" value = "3"/>
-        <param name="Kp" value = "2.0"/>
+        <param name="acc_max" value = "1"/>
+        <param name="Kp" value = "1.0"/>
         <param name="Ki" value = "0.0"/>
         <param name="Kd" value = "0.0"/>
         <param name="car_initposx" value = "3.0"/>
@@ -36,8 +37,8 @@
   <!-- <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch"> -->
   <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
     <arg name="robot_name" value="ugv0" />
-    <arg name="pose_x" value="1" />
-    <arg name="pose_y" value="1" />
+    <arg name="pose_x" value="3" />
+    <arg name="pose_y" value="2" />
   </include>
 
   <arg name="pid_gui" default="false"/>

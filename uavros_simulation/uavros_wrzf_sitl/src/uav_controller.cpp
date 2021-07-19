@@ -31,7 +31,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   target_err_Sub_ = nh_.subscribe("target_angle",10,&uavCtrl::targetCallback,this,ros::TransportHints().tcpNoDelay());
   //precise_landing_client_ = nh_.serviceClient<std_srvs::SetBool>("precise_landing");
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.05), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
 
   nh_private_.param<double>("arrive_alt", arrive_alt_, 7.0);
   nh_private_.param<double>("track_alt", track_alt_, 5.0);
@@ -42,6 +42,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   nh_private_.param<double>("Kd", Kd_, 0.0);
   nh_private_.param<double>("car_initposx", car_initposx_, 1.0);
   nh_private_.param<double>("car_initposy", car_initposy_, 1.0);
+  nh_private_.param<double>("acc_max",acc_max_, 0.1);
   
   cout << "arrive_alt: " << arrive_alt_ << endl;
   cout << "track_alt: " << track_alt_ << endl;
@@ -49,6 +50,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   cout << "Kd: " << Kd_ << endl;
   cout << "Ki: " << Ki_ << endl;
   cout << "vxy_max: " << vxy_max_ << endl;
+  cout << "acc_max: " << acc_max_ << endl;
 
   takeoff_triggered_ = false;
   offboard_triggered_ = false;
@@ -62,6 +64,7 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   error_pE_ = 0.1;
   error_pN_ = 0.1;
   VxyPz_sp_ << 0.0,0.0,track_alt_;
+  VxyPz_sp_tmp_ << 0.0,0.0,track_alt_;
 
   yaw_sp_ = hover_yaw_;
 
@@ -95,12 +98,13 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     {
       cout << "warning: the jc2fk.txt content is not wait!" << endl;
     }
+    //TODO:how to avoid that the initial data in txt is takeoff
     if (command_ == LAUNCH)
     {
-      //controller_state = TAKEOFF;
-      //cout << "TAKEOFF" << endl;
-      controller_state = TRACK; //just for test,straight to track mode
-      cout << "TRACK" << endl; //just for test,straight to track mode
+      controller_state = TAKEOFF;
+      cout << "TAKEOFF" << endl;
+      //controller_state = TRACK; //just for test,straight to track mode
+      //cout << "TRACK" << endl; //just for test,straight to track mode
 
       break;
     }
@@ -126,6 +130,7 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
       }
     }
   */
+    //TODO: the height in TAKEOFF mode is related to arrive_alt_ in FLYTOCAR mode?
     if ((px4_state_.mode != "AUTO.TAKEOFF")&&(mavPos_(2) < 2.0))
     {
       mode_cmd_.request.custom_mode = "AUTO.TAKEOFF";
@@ -216,7 +221,9 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     }
     yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
     //pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
+    AccLimit(VxyPz_sp_);
     pubVxyPzCmd(VxyPz_sp_);
+    VxyPz_sp_tmp_ = VxyPz_sp_;//save V
 
     if (command_ == RETURN)
     {
@@ -338,6 +345,21 @@ void uavCtrl::pubVxyPzCmd(const Eigen::Vector3d &cmd_sp)
   msg.velocity.z = 0; //pub vz
   msg.position.z = cmd_sp(2); // pub local z altitude setpoint
   target_pose_pub_.publish(msg);
+}
+
+void uavCtrl::AccLimit(Eigen::Vector3d &cmd_sp)
+{
+  float dvx = cmd_sp(0) - mavVel_(0);
+  float dvy = cmd_sp(1) - mavVel_(1);
+  float dv = pow((dvx*dvx+dvy*dvy),0.5) ;
+  if(dv/0.05>acc_max_)
+  {
+    cmd_sp(0) = mavVel_(0) + acc_max_/dv*dvx;
+    cmd_sp(1) = mavVel_(1) + acc_max_/dv*dvy;
+  }
+//if((cmd_sp(0)<mavVel_(0) - acc_max_)||(cmd_sp(0)>mavVel_(0) + acc_max_)||(cmd_sp(1)>mavVel_(0) + acc_max_)||(cmd_sp(1)>mavVel_(0) + acc_max_))
+  //cmd_sp(0) = max(mavVel_(0)-acc_max_, min(cmd_sp(0), mavVel_(0) + acc_max_));//acc resist
+  //cmd_sp(1) = max(mavVel_(1)-acc_max_, min(cmd_sp(1), mavVel_(1) + acc_max_));//saturation resist
 }
 
 void uavCtrl::pub_body_VxyPzCmd(const Eigen::Vector3d &cmd_sp)
