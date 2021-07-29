@@ -18,39 +18,71 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
 {
   mavposeSub_ = nh_.subscribe("mavros/local_position/pose", 1, &uavCtrl::mavpose_cb, this, ros::TransportHints().tcpNoDelay());
   mavtwistSub_ = nh_.subscribe("mavros/local_position/velocity_local", 1, &uavCtrl::mavtwist_cb, this, ros::TransportHints().tcpNoDelay());
-  //leaderposeSub_ = nh_.subscribe("leader_pose_estimate", 1, &uavCtrl::leaderpose_cb, this, ros::TransportHints().tcpNoDelay()); 
-  //cmdSub_ = nh_.subscribe("/cmd", 1, &uavCtrl::cmd_cb, this, ros::TransportHints().tcpNoDelay()); 
   px4stateSub_ = nh_.subscribe("mavros/state", 1, &uavCtrl::px4state_cb, this, ros::TransportHints().tcpNoDelay());
-  gimbalSub_ = nh_.subscribe("/gimbal/gimbal_state", 1, &uavCtrl::gimbal_cb, this, ros::TransportHints().tcpNoDelay());
+  //gimbalSub_ = nh_.subscribe("/gimbal/gimbal_state", 1, &uavCtrl::gimbal_cb, this, ros::TransportHints().tcpNoDelay());
   jc_cmdSub_ = nh_.subscribe("/jc_cmd", 1, &uavCtrl::jc_cmd_cb, this, ros::TransportHints().tcpNoDelay());
   target_pose_pub_ = nh_.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
-  en_track_pub_ = nh_.advertise<std_msgs::String>("gimbal/gimbal_cmd", 10);
-
+  shape_yaw_pub_ = nh_.advertise<std_msgs::Float32>("/yaw_east_to_head_deg", 10);
+  //en_track_pub_ = nh_.advertise<std_msgs::String>("gimbal/gimbal_cmd", 10);
+	globalposSub_ = nh_.subscribe("mavros/global_position/global",10,&uavCtrl::globalpos_cb, this, ros::TransportHints().tcpNoDelay());
   arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
   setMode_client_ = nh_.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
   target_err_Sub_ = nh_.subscribe("target_angle",10,&uavCtrl::targetCallback,this,ros::TransportHints().tcpNoDelay());
   //precise_landing_client_ = nh_.serviceClient<std_srvs::SetBool>("precise_landing");
+  publoop_timer_ = nh_.createTimer(ros::Duration(0.05), &uavCtrl::publoop_cb, this);  // Define timer for pub loop rate  
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.05), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
-
-  nh_private_.param<double>("arrive_alt", arrive_alt_, 7.0);
-  nh_private_.param<double>("track_alt", track_alt_, 5.0);
-  nh_private_.param<double>("hover_yaw_rad", hover_yaw_, 0.0);  
-  nh_private_.param<double>("vxy_max", vxy_max_, 4.0);
+  nh_private_.param<double>("loop_sec", loop_sec_, 0.05);
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(loop_sec_), &uavCtrl::cmdloop_cb, this);  // Define timer for constant loop rate  
+  nh_private_.param<double>("arrive_alt", arrive_alt_, 10.0);
+  nh_private_.param<double>("track_alt", track_alt_, 10.0);
+  nh_private_.param<double>("hover_yaw_rad", hover_yaw_, 4.0);  
+  nh_private_.param<double>("vxy_max", vxy_max_, 3.0);
+  nh_private_.param<double>("acc_max",acc_max_, 6);
   nh_private_.param<double>("Kp", Kp_, 1.0);
   nh_private_.param<double>("Ki", Ki_, 0.0);
   nh_private_.param<double>("Kd", Kd_, 0.0);
-  nh_private_.param<double>("car_initposx", car_initposx_, 1.0);
-  nh_private_.param<double>("car_initposy", car_initposy_, 1.0);
-  nh_private_.param<double>("acc_max",acc_max_, 0.1);
-  
+  //nh_private_.param<double>("car_initposx", car_initposx_, 1.0);
+  //nh_private_.param<double>("car_initposy", car_initposy_, 1.0);
+  nh_private_.param<float>("car_initLat_deg", car_initLat_, 0.0);
+  nh_private_.param<float>("car_initLon_deg", car_initLon_, 0.0);
+  nh_private_.param<float>("car_Lat1_", car_Lat1_, 0.0);
+  nh_private_.param<float>("car_Lon1_", car_Lon1_, 0.0);
+  nh_private_.param<float>("car_Lat2_", car_Lat2_, 0.0);
+  nh_private_.param<float>("car_Lon2_", car_Lon2_, 0.0);
+  nh_private_.param<float>("car_Lat3_", car_Lat3_, 0.0);
+  nh_private_.param<float>("car_Lon3_", car_Lon3_, 0.0);
+  nh_private_.param<float>("car_Lat4_", car_Lat4_, 0.0);
+  nh_private_.param<float>("car_Lon4_", car_Lon4_, 0.0);
+  nh_private_.param<float>("car_Lat5_", car_Lat5_, 0.0);
+  nh_private_.param<float>("car_Lon5_", car_Lon5_, 0.0);
+  nh_private_.param<float>("car_Lat6_", car_Lat6_, 0.0);
+  nh_private_.param<float>("car_Lon6_", car_Lon6_, 0.0);
+  nh_private_.param<float>("car_Lat7_", car_Lat7_, 0.0);
+  nh_private_.param<float>("car_Lon7_", car_Lon7_, 0.0);
+  nh_private_.param<double>("Mission_sec", Mission_sec_, 200.0);
+  nh_private_.param<double>("lost_sec_thre",lost_sec_thre_, 7.0);
+  nh_private_.param<double>("v_thres_yawrotate",v_thres_yawrotate_, 1.7);
+  nh_private_.param<bool>("auto_arm",auto_arm_, false);
+  nh_private_.param<bool>("en_preset_mode",en_preset_mode_, false);
+  nh_private_.param<bool>("en_yaw_rotate",en_yaw_rotate_, false);
+
+  cout << "loop_sec: " << loop_sec_ << endl;
+  cout << "Mission_sec: " << Mission_sec_ << endl;
+  cout << "auto_arm: " << auto_arm_ << endl;
+  cout << "lost_sec_thre: " << lost_sec_thre_ << endl;
+  cout << "en_preset_mode: " << en_preset_mode_ << endl;
+  cout << "v_thres_yawrotate: " << v_thres_yawrotate_ << endl;
   cout << "arrive_alt: " << arrive_alt_ << endl;
   cout << "track_alt: " << track_alt_ << endl;
+  cout << "hover_yaw_rad: " << hover_yaw_ << endl;
+  cout << "vxy_max: " << vxy_max_ << endl;
+  cout << "acc_max: " << acc_max_ << endl;
   cout << "Kp: " << Kp_ << endl;
   cout << "Kd: " << Kd_ << endl;
   cout << "Ki: " << Ki_ << endl;
-  cout << "vxy_max: " << vxy_max_ << endl;
-  cout << "acc_max: " << acc_max_ << endl;
+  cout << "car_initLat_deg: " << car_initLat_ << endl;
+  cout << "car_initLon_deg: " << car_initLon_ << endl;
+  cout << "en_yaw_rotate: " << en_yaw_rotate_ << endl;
 
   takeoff_triggered_ = false;
   offboard_triggered_ = false;
@@ -73,13 +105,31 @@ uavCtrl::uavCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private)
   gim_servo_state_ = "init";
   gim_track_state_ = "init";
 
+  flag = 0;
+  lost_num_ = 0;
+
   controller_state = PREPARE;
   last_state = PREPARE;
   command_ = BLANK;
-  target_err_x = 0;
-  target_err_y = 0;
-  flag = 0;
+  target_err_pE_ = 0;
+  target_err_pN_ = 0;
   heading_ = 0;
+  v_heading_ = 0;
+
+  car_initposx_ = 0; car_initposy_ = 0;
+  car_posx1_=0, car_posy1_=0, car_posx2_=0, car_posy2_=0, car_posx3_=0, car_posy3_=0;
+  car_posx4_=0, car_posy4_=0, car_posx5_=0, car_posy5_=0, car_posx6_=0, car_posy6_=0;
+  car_posx7_=0, car_posy7_=0;
+
+  mavLat_ = 0;
+  mavLon_ = 0;
+  mavLat_init_ = 0;
+  mavLon_init_ = 0;
+  mavPE_init_ = 0;
+  mavPN_init_ = 0; 
+
+  time_init_ = 0;
+  time_now_ = 0;
 }
 
 void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
@@ -87,13 +137,11 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   switch (controller_state)
   {
   case PREPARE: //waiting and initilizing
-    //VxyPz_sp << 0.0, 0.0, alt_sp;
-    //pubVxyPzCmd(VxyPz_sp);
-    //if(gim_servo_state_ == "TRACK")
-    //{
-      //string_msg_.data = "CLOSE"; //close camera tracking
-      //en_track_pub_.publish(string_msg_);
-    //}
+	//TODO: decide whether is right lat and lon
+    mavLat_init_ = mavLat_;
+    mavLon_init_ = mavLon_;
+    mavPE_init_ = mavPos_(0);
+    mavPN_init_ = mavPos_(1); 
     if(command_ != BLANK)
     {
       cout << "warning: the jc2fk.txt content is not wait!" << endl;
@@ -101,36 +149,47 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     //TODO:how to avoid that the initial data in txt is takeoff
     if (command_ == LAUNCH)
     {
+      time_init_ = ros::Time::now().toSec();
       controller_state = TAKEOFF;
       cout << "TAKEOFF" << endl;
       //controller_state = TRACK; //just for test,straight to track mode
       //cout << "TRACK" << endl; //just for test,straight to track mode
-
       break;
     }
-
+    //compute car_initposx_, car_initposy_ in local ENU
+    if ((car_initLat_ == 0) || (car_initLon_ == 0))
+    {
+      cout << "warning: car_initLat_ or car_initLon_ is 0!" << endl;
+      break;
+    }
+    else
+    {
+      compute_preset_pos(); //gps to local
+    }
     last_state = PREPARE;
     cout << "PREPARE" << endl;
     break;
   
   case TAKEOFF:
-  //TODO: under 2m, continuing to trigger takeoff
-  /*
-    if(takeoff_triggered_ == false)
+    if (command_ == BLANK)
     {
-      mode_cmd_.request.custom_mode = "AUTO.TAKEOFF";
-		  if(setMode_client_.call(mode_cmd_))
-      {
-        takeoff_triggered_ = true;
-        cout << "takeoff mode triggered, please arm" << endl;
-      }
-      else
-      {
-        cout << "takeoff trigger fail,arm first" << endl;
-      }
+      controller_state = PREPARE;
+      cout << "PREPARE" << endl;
+      break;
     }
-  */
-    //TODO: the height in TAKEOFF mode is related to arrive_alt_ in FLYTOCAR mode?
+    if ((car_initposx_ == 0) || (car_initposy_ == 0))
+    {
+	cout << "warning: the jc2fk.txt content is not wait, break!" << endl;
+        break;
+    }
+    if(!px4_state_.armed && auto_arm_)  //进入offboard自动解锁，危险，还是手动解锁吧
+    {
+      arm_cmd_.request.value = true; //spx
+      arming_client_.call(arm_cmd_); //spx
+      ros::Duration(0.5).sleep(); //spx
+      cout << "not arming" <<endl;
+    }
+    //under 2m, continuing to trigger takeoff
     if ((px4_state_.mode != "AUTO.TAKEOFF")&&(mavPos_(2) < 2.0))
     {
       mode_cmd_.request.custom_mode = "AUTO.TAKEOFF";
@@ -142,14 +201,20 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
       cout << "FLYTOCAR" << endl;
       break;
     }  
+    if ((ros::Time::now().toSec()-time_init_) > Mission_sec_)
+    {
+      controller_state = FINISH;
+      cout << "RETURN, time is up" << endl;
+      break;      
+    }
     last_state = TAKEOFF;
-    cout << "TAKEOFF" << endl;
+    //cout << "TAKEOFF" << endl;
     break;
 
   case FLYTOCAR:
     PxyPz_sp << car_initposx_, car_initposy_, arrive_alt_;
     pubPxyPzCmd(PxyPz_sp);
-    if((px4_state_.mode != "OFFBOARD")&&(offboard_triggered_ == false))
+    if((px4_state_.mode != "OFFBOARD")&&(offboard_triggered_ == false)) //can switch to manual mode
     {
       mode_cmd_.request.custom_mode = "OFFBOARD";
 			if(setMode_client_.call(mode_cmd_))
@@ -162,6 +227,13 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
     {
       controller_state = HOVER_ON_CAR;
       cout << "HOVER_ON_CAR" << endl;
+      break;
+    }
+    if ((ros::Time::now().toSec()-time_init_) > Mission_sec_)
+    {
+      controller_state = FINISH;
+      cout << "RETURN, time is up" << endl;
+      break;      
     }
     last_state = FLYTOCAR;
     //cout << "FLYTOCAR" << endl;
@@ -169,14 +241,18 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
 
   case HOVER_ON_CAR:
     PxyPz_sp << car_initposx_, car_initposy_, track_alt_;
-    //hover_yaw_ = 0.0; //TODO: calculate vertical to velocity or car heading
     pubPxyzYawCmd(PxyPz_sp,hover_yaw_);
-    if((fabs(mavPos_(2)-track_alt_) < 0.3))
+    if((fabs(mavPos_(2)-track_alt_) < 0.2)&&(fabs(heading_-hover_yaw_)<0.09))
     {
       controller_state = TRACK;
       cout << "TRACK" << endl;
-      //string_msg_.data = "OPEN";
-      //en_track_pub_.publish(string_msg_); //open camera tracking
+      break;
+    }
+    if ((ros::Time::now().toSec()-time_init_) > Mission_sec_)
+    {
+      controller_state = FINISH;
+      cout << "RETURN, time is up" << endl;
+      break;      
     }
     last_state = HOVER_ON_CAR;
     //cout << "HOVER_ON_CAR" << endl;
@@ -190,51 +266,135 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
       pidy.integral = 0.0;
       VxyPz_sp_ << 0.0,0.0,track_alt_;
       cout<<"WAITING OFFBOARD!"<<endl;
-      //string_msg_.data = "CLOSE";
-      //en_track_pub_.publish(string_msg_); //close camera tracking
-      //cout << "CLOSE CAMERA TRACK"<< endl;
     }
     else //offboard
     {
-      if(flag = 0)
+      if(flag == 0)
       {
-        cout << "LOST!"<< endl;
+        if((lost_num_ < lost_sec_thre_/loop_sec_))
+        {
+          lost_num_ = lost_num_ +1;
+          cout << "LOST! seconds: "<< lost_num_*loop_sec_ << endl;
+        }
+        else
+        {
+          lost_num_ = 0;
+          //TODO: fly to a preset position, another mode
+          if(en_preset_mode_)
+          {
+            controller_state = PRESET;
+            cout << "FLY TO PRESET" << endl;
+          }
+        }
       }
       else
       {
-        computeVelCmd(VxyPz_sp_, target_err_x, target_err_y);
-        cout << "x"<<target_err_x<<"y"<<target_err_y<< endl;
+        lost_num_ = 0;
+        computeVelCmd(VxyPz_sp_, target_err_pE_, target_err_pN_);
+        cout << "error_pE: "<<target_err_pE_<<", error_pN: "<<target_err_pN_<< endl;
+        if(en_yaw_rotate_)
+        {
+		if(sqrt(mavVel_(0)*mavVel_(0)+mavVel_(1)*mavVel_(1)) > v_thres_yawrotate_)
+		{
+		  yaw_sp_ = v_heading_ + PI/2;
+		//TODO: cancle yaw_sp change, pub v_heading_ to /yaw_east_to_head_deg
+		}          
+        }
       }
-      //if((gim_servo_state_ != "TRACK")&&(gim_track_state_ == "HaveTarget"))
-      //{
-        //string_msg_.data = "OPEN";
-        //en_track_pub_.publish(string_msg_); //open camera tracking
-        //cout << "OPEN CAMERA TRACK"<< endl;
-      //}
-      //if((gim_servo_state_ == "TRACK")&&(gim_track_state_ != "Missing"))
-      //{
-        //computeError(gim_yaw_, gim_pitch_, mavAtt_, mavPos_); //compute error_pE_,error_pN_
-        //cout << "error_pE_: " << error_pE_ << ", error_pN_: " << error_pN_ << endl;
-        //computeVelCmd(VxyPz_sp_, error_pE_, error_pN_); //compute VxyPz_sp_
-      //}
-	   //TODO: if missing target for too long, fly following other UAVs
     }
-    yaw_sp_ = hover_yaw_;//TODO: calculate vertical to velocity or car heading
-    //pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
     AccLimit(VxyPz_sp_);
-    pubVxyPzCmd(VxyPz_sp_);
-    VxyPz_sp_tmp_ = VxyPz_sp_;//save V
+    pubVxyPzYawCmd(VxyPz_sp_, yaw_sp_);
+    //pubVxyPzCmd(VxyPz_sp_);
 
     if (command_ == RETURN)
     {
       controller_state = FINISH;
-      cout << "RETURN" << endl;
+      cout << "RETURN, receive return command" << endl;
+      break;
     }
-    //TODO: if exceed 6min, atuo return
+    if ((ros::Time::now().toSec()-time_init_) > Mission_sec_)
+    {
+      controller_state = FINISH;
+      cout << "RETURN, time is up" << endl;
+      break;      
+    }
     last_state = TRACK;
     //cout << "TRACK" << endl;
     break;
 
+  case PRESET:
+    pidx.integral = 0.0;
+    pidy.integral = 0.0;
+    VxyPz_sp_ << 0.0,0.0,track_alt_;
+    if (flag == 1)
+    {
+      controller_state = TRACK;
+      cout << "TRACK" << endl;
+      break;
+    }
+    if (command_ == RETURN)
+    {
+      controller_state = FINISH;
+      cout << "RETURN, receive return command" << endl;
+      break;
+    }
+    if ((ros::Time::now().toSec()-time_init_) > Mission_sec_)
+    {
+      controller_state = FINISH;
+      cout << "RETURN, time is up" << endl;
+      break;      
+    }
+    if ((ros::Time::now().toSec()-time_init_) < (180 + 24))
+    {
+      PxyPz_sp << car_posx1_, car_posy1_, track_alt_;
+      yaw_sp_ = -163*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 + 24)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 49)) )
+    {
+      PxyPz_sp << car_posx2_, car_posy2_, track_alt_;
+      yaw_sp_ = -76*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 + 49)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 61)) )
+    {
+      PxyPz_sp << car_posx3_, car_posy3_, track_alt_;
+      yaw_sp_ = 0*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 + 61)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 84)) )
+    {
+      PxyPz_sp << car_posx4_, car_posy4_, track_alt_;
+      yaw_sp_ = -87*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 + 84)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 102)) )
+    {
+      PxyPz_sp << car_posx5_, car_posy5_, track_alt_;
+      yaw_sp_ = -12*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 + 102)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 125)) )
+    {
+      PxyPz_sp << car_posx6_, car_posy6_, track_alt_;
+      yaw_sp_ = 20*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 +125)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 146)) )
+    {
+      PxyPz_sp << car_posx7_, car_posy7_, track_alt_;
+      yaw_sp_ = 143*PI/180 + PI/2;
+    }
+    if ( ((ros::Time::now().toSec()-time_init_) >= (180 + 146)) &&
+            ((ros::Time::now().toSec()-time_init_) < (180 + 178)) )
+    {
+      PxyPz_sp << car_initposx_, car_initposy_, track_alt_;
+    }
+
+    pubPxyzYawCmd(PxyPz_sp,yaw_sp_);
+    last_state = PRESET;
+    break;
+  
   case FINISH:
     if((px4_state_.mode != "AUTO.RTL")&&(return_triggered_ == false))
     {
@@ -246,7 +406,7 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
       }      
     }
     last_state = FINISH;
-    cout << "RETURN" << endl;
+    cout << "RETURN, receive return command" << endl;
     break;
 
   default:
@@ -255,6 +415,12 @@ void uavCtrl::cmdloop_cb(const ros::TimerEvent &event)
   }
 }
 
+void uavCtrl::publoop_cb(const ros::TimerEvent &event)
+{
+  std_msgs::Float32 msg;
+  msg.data = heading_*180/PI - 90;
+  shape_yaw_pub_.publish(msg);
+}
 
 void uavCtrl::computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, const double &error_py)
 {
@@ -265,6 +431,7 @@ void uavCtrl::computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, c
   pidx.error_last = error_px;
   vxypz_sp(0) = Kp_*pidx.error + Kd_*pidx.derivative + Ki_*pidx.integral;
   vxypz_sp(0) = max(-vxy_max_, min(vxy_max_, vxypz_sp(0)));
+  //cout << "vx_cmd: " << vxypz_sp(0) << endl;
 
   pidy.error = error_py;
   pidy.derivative = error_py - pidy.error_last;
@@ -273,6 +440,7 @@ void uavCtrl::computeVelCmd(Eigen::Vector3d &vxypz_sp, const double &error_px, c
   pidy.error_last = error_py;
   vxypz_sp(1) = Kp_*pidy.error + Kd_*pidy.derivative + Ki_*pidy.integral;
   vxypz_sp(1) = max(-vxy_max_, min(vxy_max_, vxypz_sp(1)));
+  //cout << "vy_cmd: " << vxypz_sp(1) << endl;
 
   vxypz_sp(2) = track_alt_;
 }
@@ -351,15 +519,13 @@ void uavCtrl::AccLimit(Eigen::Vector3d &cmd_sp)
 {
   float dvx = cmd_sp(0) - mavVel_(0);
   float dvy = cmd_sp(1) - mavVel_(1);
+//TODO: not minus mavVel_, but cmd_sp_last!
   float dv = pow((dvx*dvx+dvy*dvy),0.5) ;
-  if(dv/0.05>acc_max_)
+  if(dv/loop_sec_>acc_max_)
   {
-    cmd_sp(0) = mavVel_(0) + acc_max_/dv*dvx;
-    cmd_sp(1) = mavVel_(1) + acc_max_/dv*dvy;
+    cmd_sp(0) = mavVel_(0) + acc_max_*loop_sec_/dv*dvx;
+    cmd_sp(1) = mavVel_(1) + acc_max_*loop_sec_/dv*dvy;
   }
-//if((cmd_sp(0)<mavVel_(0) - acc_max_)||(cmd_sp(0)>mavVel_(0) + acc_max_)||(cmd_sp(1)>mavVel_(0) + acc_max_)||(cmd_sp(1)>mavVel_(0) + acc_max_))
-  //cmd_sp(0) = max(mavVel_(0)-acc_max_, min(cmd_sp(0), mavVel_(0) + acc_max_));//acc resist
-  //cmd_sp(1) = max(mavVel_(1)-acc_max_, min(cmd_sp(1), mavVel_(1) + acc_max_));//saturation resist
 }
 
 void uavCtrl::pub_body_VxyPzCmd(const Eigen::Vector3d &cmd_sp)
@@ -387,9 +553,9 @@ void uavCtrl::mavpose_cb(const geometry_msgs::PoseStamped &msg)
   Eigen::Quaterniond quaternion(mavAtt_);
   Eigen::Vector3d eulerAngle = quaternion.matrix().eulerAngles(2,1,0);
   if (abs(eulerAngle(1)) > 3) //pitch should be within (-pi/2,pi/2)
-    heading_ = eulerAngle(0) - M_PI;
+    heading_ = eulerAngle(0) - M_PI; //rad
   else
-    heading_ = eulerAngle(0);
+    heading_ = eulerAngle(0); //rad
     //cout<<heading_<<endl;
 }
 
@@ -398,6 +564,16 @@ void uavCtrl::mavtwist_cb(const geometry_msgs::TwistStamped &msg)
   mavVel_(0) = msg.twist.linear.x;
   mavVel_(1) = msg.twist.linear.y;
   mavVel_(2) = msg.twist.linear.z;
+  if (sqrt(mavVel_(0)*mavVel_(0)+mavVel_(1)*mavVel_(1)) > 0.02)
+  {
+    v_heading_ = atan2(mavVel_(1),mavVel_(0)); //rad
+  }
+}
+
+void uavCtrl::globalpos_cb(const sensor_msgs::NavSatFix &msg)
+{
+  mavLat_ = msg.latitude;
+  mavLon_ = msg.longitude;
 }
 
 /*
@@ -437,22 +613,9 @@ void uavCtrl::targetCallback(const geometry_msgs::Quaternion&msg)
   float err_l;
   err_f = tan(msg.x/57.3) * mavPos_(2);//msg.x is f angle
 	err_l = tan(msg.y/57.3) * mavPos_(2);//y
-  //cout<<"height:"<<mavPos_(2)<<endl;
-  //cout<<"err_f:  "<<err_f<<"err_l:  "<<err_l<<endl;
-  target_err_x = err_f *cos(heading_)-err_l*sin(heading_);//east error
-  target_err_y = err_f*sin(heading_)+err_l*cos(heading_);
-  //target_err_x = tan(msg.x/57.3) * mavPos_(2);
-	//target_err_y = tan(msg.y/57.3) * mavPos_(2);
-  //cout<<"target_err_x: "<<target_err_x<<" target_err_y: "<<target_err_y<<endl;
+  target_err_pE_ = err_f *cos(heading_)-err_l*sin(heading_);//east error
+  target_err_pN_ = err_f*sin(heading_)+err_l*cos(heading_);
 	flag = msg.w;
-}
-
-void uavCtrl::gimbal_cb(const uavros_msgs::TrackState &msg)
-{
-  gim_servo_state_ = msg.servo_state;
-  gim_track_state_ = msg.track_state;
-  gim_yaw_ = msg.yaw;
-  gim_pitch_ = msg.pitch;
 }
 
 void uavCtrl::px4state_cb(const mavros_msgs::State &msg)
@@ -460,11 +623,49 @@ void uavCtrl::px4state_cb(const mavros_msgs::State &msg)
 	px4_state_ = msg;
 }
 
-/*
-void uavCtrl::dynamic_callback(const uavros_wrzf_sitl::dynamicConfig &config)
+void uavCtrl::gps_to_local(float &local_E, float &local_N,
+                               const float &target_lat, const float &target_lon,
+                                const float &ref_E, const float &ref_N,
+                                  const float &ref_lat, const float &ref_lon)
 {
-  Kp_ = config.P;
-  Ki_ = config.I;
-  Kd_ = config.D;
+  std::array<double, 2> delta_EN;
+  delta_EN = wgs84::toCartesian({ref_lat, ref_lon}, {target_lat, target_lon});
+  local_E = ref_E + delta_EN[0];
+  local_N = ref_N + delta_EN[1];
 }
-*/
+
+void uavCtrl::compute_preset_pos()
+{
+  gps_to_local(car_initposx_, car_initposy_,
+                car_initLat_, car_initLon_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);
+  gps_to_local(car_posx1_, car_posy1_,
+                car_Lat1_, car_Lon1_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);  
+  gps_to_local(car_posx2_, car_posy2_,
+                car_Lat2_, car_Lon2_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);         \
+  gps_to_local(car_posx3_, car_posy3_,
+                car_Lat3_, car_Lon3_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);  
+  gps_to_local(car_posx4_, car_posy4_,
+                car_Lat4_, car_Lon4_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);      
+  gps_to_local(car_posx5_, car_posy5_,
+                car_Lat5_, car_Lon5_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);  
+  gps_to_local(car_posx6_, car_posy6_,
+                car_Lat6_, car_Lon6_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);
+  gps_to_local(car_posx7_, car_posy7_,
+                car_Lat7_, car_Lon7_,
+                  mavPE_init_, mavPN_init_,
+                    mavLat_init_, mavLon_init_);                                      
+}

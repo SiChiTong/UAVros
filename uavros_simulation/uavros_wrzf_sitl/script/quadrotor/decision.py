@@ -8,6 +8,7 @@ LastEditors: LI Jinjie
 LastEditTime: 2021/5/26 11:08
 Description: receive the states of cars and uavs, and return the action.
 '''
+# from grader import AWAY, CLOSE
 import numpy as np
 import quadrotor.cmd as cmd
 import quadrotor.parameters as para
@@ -18,7 +19,7 @@ class DecisionMaker:
     检测每架飞机所处的状态，进行对五架无人机全部进行的操作。
     """
 
-    def __init__(self, method, cars=[2, 2, 1], detection_save_num=5):
+    def __init__(self, method, cars=[1, 3, 1], detection_save_num=5):
         """
 
         :param method: 'stable,4', 'max,5', 'stable,5'
@@ -27,6 +28,7 @@ class DecisionMaker:
         self.ready_dict = None
         self.reset_ready_dict()
         self.destinations = {}
+        self.real_num = 0
 
         # 决策表
         self.uav_order = [para.UAV_AC_NAME, para.UAV_A1_NAME, para.UAV_A2_NAME, para.UAV_SM_NAME, para.UAV_SS_NAME]
@@ -131,7 +133,7 @@ class DecisionMaker:
     def reset_ready_dict(self, mode=para.MODE_0):
         if mode == para.MODE_0:
             self.ready_dict = {para.UAV_A1_NAME: True, para.UAV_A2_NAME: True, para.UAV_AC_NAME: False,
-                               para.UAV_SM_NAME: True, para.UAV_SS_NAME: True, para.GROUND_STATION_NAME: False}
+                               para.UAV_SM_NAME: True, para.UAV_SS_NAME: True, para.GROUND_STATION_NAME: False} # TODO: change here
         elif mode == para.MODE_2:
             self.ready_dict = {para.UAV_SM_NAME: False, para.UAV_SS_NAME: False}
 

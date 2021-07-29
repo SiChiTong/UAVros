@@ -7,21 +7,14 @@
 @Email   : lijinjie362@outlook.com
 @Description:  None
 '''
-# 导引头给决策
-FROM_DYT_F = "from_dyt.txt"
-
-DETECT_SUCCESS = "success"
-
-# 决策给导引头
-TO_DYT_F = "to_dyt.txt"
-
-DYT_SHUT_DOWN = "shut down"
-DYT_OPEN = "open"
 
 # 飞控给决策
 FROM_FK_F = "from_fk.txt"
 
-# ARRIVED = "arrived"  # 表示飞到目标区域
+# 飞控给决策的位置文件
+FROM_FK_STATE_F = "position.json"
+
+ARRIVED = "arrived"  # 表示飞到目标区域
 
 REACH_SUCCESS = "success"
 REACH_FALSE = "failure"
@@ -36,10 +29,8 @@ GO_TO_CAR_NUM = ["car 0",
 # 决策给飞控
 TO_FK_F = "jc2fk.txt"
 
-WAIT = "wait"
-
+WAIT = "wait"  # 等待模式
 FLY = "takeoff"  # 表示起飞
-
 RETURN = "return"
 
 # YOLO给决策
@@ -49,6 +40,15 @@ FROM_YOLO_F_2 = "from_yolo_2.txt"
 # 发给我数字
 
 # 与飞控进行状态交互
-STATE_F_C = "state_c.txt"
-STATE_F_1 = "state_1.txt"
-STATE_F_2 = "state_2.txt"
+# STATE_F_C = "state_c.txt"
+Follower_Action_None = 0
+Follower_Action_Land = 1
+Follower_Action_RTL = 2
+Follower_Action_Takeoff = 3
+Follower_Action_Follow = 4
+Follower_Action_Arm = 5
+Follower_Action_Terminate = 6
+
+# dui xing
+TYPE_CLOSE = 1
+TYPE_FAR = 2

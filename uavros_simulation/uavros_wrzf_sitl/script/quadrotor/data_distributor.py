@@ -10,19 +10,19 @@ Description: 专门进行监听到数据后的处理。
 '''
 import json
 import time
+import sys
 
 import quadrotor.parameters as para
 import quadrotor.cmd as cmd
-
-
-# TODO：对消息的判断应该写一个专门的类，callback是这个类的一个方法，传入Uav()和StateMonitor()作为参数，这样也不需要flag了
-
+from send_to_fk import *
+from cmd_with_outer_hardware import *
 
 class DataDistributor:
-    def __init__(self, uav, decision_maker=None):
+    def __init__(self, uav, data_2_fk, decision_maker=None):
         # 中心节点传入两个类，其他节点只传入一个类
         self.uav = uav
         self.decision_maker = decision_maker
+        self.data_2_fk = data_2_fk
 
         # 用于信息接收
         self.rx_node = None
@@ -59,46 +59,87 @@ class DataDistributor:
             elif self.rx_cmd == cmd.DETECT_NUM[0]:
                 # 更新车的数字
                 this_car = self.decision_maker.uav_track_which_car[self.rx_node]  # 都跟1车
+                self.decision_maker.real_num = 0
 
                 # First In First Out 调整观测数组
-                self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
-                self.decision_maker.car_num_detections[this_car].append(0)  # 加入检测：数字0
+                # self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
+                # self.decision_maker.car_num_detections[this_car].append(0)  # 加入检测：数字0
                 # self.decision_maker.car_num_real[this_car] = 0
                 self.decision_maker.new_detection_flag = True
-                print("从" + self.uav.name + "收到观测数据" + " car:" + str(this_car) + " number: 0")
+                print("从" + self.rx_node + "收到观测数据" + " car:" + str(this_car) + " number: 0")
 
             elif self.rx_cmd == cmd.DETECT_NUM[1]:
                 # 更新车的数字
                 this_car = self.decision_maker.uav_track_which_car[self.rx_node]
+                self.decision_maker.real_num = 1
 
                 # First In First Out 调整观测数组
-                self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
-                self.decision_maker.car_num_detections[this_car].append(1)  # 加入检测：数字1
+                # self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
+                # self.decision_maker.car_num_detections[this_car].append(1)  # 加入检测：数字1
                 # self.decision_maker.car_num_real[this_car] = 1
                 self.decision_maker.new_detection_flag = True
-                print("从" + self.uav.name + "收到观测数据" + " car:" + str(this_car) + " number: 1")
+                print("从" + self.rx_node + "收到观测数据" + " car:" + str(this_car) + " number: 1")
 
             elif self.rx_cmd == cmd.DETECT_NUM[2]:
                 # 更新车的数字
                 this_car = self.decision_maker.uav_track_which_car[self.rx_node]
+                self.decision_maker.real_num = 2
+
                 # First In First Out 调整观测数组
-                self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
-                self.decision_maker.car_num_detections[this_car].append(2)  # 加入检测：数字0
+                # self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
+                # self.decision_maker.car_num_detections[this_car].append(2)  # 加入检测：数字0
 
                 # self.decision_maker.car_num_real[this_car] = 2
                 self.decision_maker.new_detection_flag = True
-                print("从" + self.uav.name + "收到观测数据" + " car:" + str(this_car) + " number: 2")
+                print("从" + self.rx_node + "收到观测数据" + " car:" + str(this_car) + " number: 2")
 
             elif self.rx_cmd == cmd.DETECT_NUM[3]:
                 # 更新车的数字
                 this_car = self.decision_maker.uav_track_which_car[self.rx_node]
+                self.decision_maker.real_num = 3
+
                 # First In First Out 调整观测数组
-                self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
-                self.decision_maker.car_num_detections[this_car].append(3)  # 加入检测：数字0
+                # self.decision_maker.car_num_detections[this_car].pop(0)  # 去除最早的检测
+                # self.decision_maker.car_num_detections[this_car].append(3)  # 加入检测：数字0
 
                 # self.decision_maker.car_num_real[this_car] = 3
                 self.decision_maker.new_detection_flag = True
-                print("从" + self.uav.name + "收到观测数据" + " car:" + str(this_car) + " number: 3")
+                print("从" + self.rx_node + "收到观测数据" + " car:" + str(this_car) + " number: 3")
+
+            elif self.rx_node == self.uav.ground_station and self.rx_cmd == cmd.RETURN:  # 强制返航
+                self.uav.mode = para.MODE_3
+                # 发给本机飞控
+                self.uav.send_to_fk(cmd.RETURN)
+
+                # 告诉从机该返航了
+                while True:
+                    try:
+                        state = self.uav.read_state_from_fk()
+                    except:
+                        continue
+
+                    if state is not None:
+                        break
+                # state = {"latitude": latitude, "longitude": longitude, "z": z, "vx": vx, "vy": vy, "vz": vz, "armed": armed,
+                #                     "mode": mode, "yaw": yaw}
+
+                apm_height = 7  # TODO: 设置返航高度
+                # id, cmd, type, loc(3), v(3), yaw
+                loc = [state['latitude'], state['longitude'], apm_height]
+                v = [state['vx'], state['vy'], state['vz']]
+                yaw = state['yaw']
+
+                self.data_2_fk.update(id=0, cmd=Follower_Action_RTL, type=TYPE_CLOSE, current_loc=loc, v=v, yaw=yaw)
+                data_2_send = self.data_2_fk.trans_data()
+                self.data_2_fk.send_broadcast(self.PORT2FK, data_to_send=data_2_send)
+
+                print("强制切换到 MODE_3：返航模式")
+                self.uav.send_data_to_one(para.GROUND_STATION_NAME, cmd.RETURN)
+
+                while input("输入'qqqq'以推出程序") == 'qqqq':
+                    break
+
+                sys.exit(0)  # 直接结束
 
         elif self.uav.name == para.GROUND_STATION_NAME:  # 地面站节点
             if self.rx_node == self.uav.uav_center and self.rx_cmd == cmd.ALL_SUCCESS:

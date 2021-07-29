@@ -170,10 +170,12 @@ class Uav:
 
         return False
 
-    def read_from_fk(self):
-        with open(FROM_FK_F, 'r') as f:
+    def read_state_from_fk(self):
+        with open(FROM_FK_STATE_F, 'r') as f:
             data = f.read()
-            return data
+            if data is None:
+                return None
+            return json.loads(data)
 
         return False
 

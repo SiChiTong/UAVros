@@ -1,0 +1,25 @@
+##Parameter for uav_controller.cpp
+
+car_initLat_deg : 39.536392
+car_initLon_deg : 115.694162
+
+car_Lat1_ : 39.5369080
+car_Lon1_ : 115.6932544
+
+car_Lat2_ : 39.5367311
+car_Lon2_ : 115.6924968
+
+car_Lat3_ : 39.5364294
+car_Lon3_ : 115.6925886
+
+car_Lat4_ : 39.5364348
+car_Lon4_ : 115.6933328
+
+car_Lat5_ : 39.5359950
+car_Lon5_ : 115.6933581
+
+car_Lat6_ : 39.5358763
+car_Lon6_ : 115.6940832
+
+car_Lat7_ : 39.5360636
+car_Lon7_ : 115.6947293

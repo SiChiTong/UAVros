@@ -1,20 +1,15 @@
 <launch>
 
     <node pkg="uavros_wrzf_sitl" type="uav_controller_node" name="uav_controller" output="screen">
-        <param name="arrive_alt" value = "7.0"/>
-        <param name="track_alt" value = "6.0"/>
-        <param name="hover_yaw_rad" value = "0.75"/>
-        <param name="vxy_max" value = "3"/>
-        <param name="acc_max" value = "1"/>
-        <param name="Kp" value = "1"/>
-        <param name="Ki" value = "0.0"/>
-        <param name="Kd" value = "0.0"/>
-        <param name="car_initposx" value = "3.0"/>
-        <param name="car_initposy" value = "2.0"/>
+        <rosparam command="load" file="$(find uavros_wrzf_sitl)/config/tracking_param.yaml" />
     </node>
 
     <node pkg="uavros_wrzf_sitl" type="message_jc2fk.py" name="message_jc2fk" output="screen">
 	<param name="txt_filepath" value = "$(find uavros_wrzf_sitl)/script/jc2fk.txt"/>
+    </node>
+
+    <node pkg="uavros_wrzf_sitl" type="broadcast_position.py" name="broadcast_position" output="screen">
+	<param name="json_filepath" value = "$(find uavros_wrzf_sitl)/script/position.json"/>
     </node>
 
     <arg name="uavID" value="5"/>
