@@ -23,9 +23,10 @@
 	<param name="txt_filepath" value = "$(find uavros_wrzf_sitl)/script/jc2fk.txt"/>
     </node-->
 
-    <node pkg="uavros_wrzf_sitl" type="broadcast_position.py" name="broadcast_position" output="screen">
+    <!-- broadcast its positon and write into script/position.json for other program to read -->
+    <!-- node pkg="uavros_wrzf_sitl" type="broadcast_position.py" name="broadcast_position" output="screen">
 	<param name="json_filepath" value = "$(find uavros_wrzf_sitl)/script/position.json"/>
-    </node>
+    </node-->
 
 
   <!-- spawn "car0" robot -->

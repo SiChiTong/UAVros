@@ -104,7 +104,7 @@ echo "source ~/UAVros/devel/setup.bash" >> ~/.bashrc
    rostopic pub /uav0/command std_msgs/Int32 "data: 1"
    ```
 
-A landing service is also provided in `landing_service.cpp` for UAV that is in offboard mode and suitable height to call to land.
+A landing service is also provided in `landing_service.cpp` for UAV that is in offboard mode and suitable height to call to land. This service is used in `uavrover_sitl.launch`  of "Multi-UAV formation tracking UGV".
 
 ![img](pictures/uav_land_ar_tag.png)
 
@@ -176,8 +176,9 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
 4. Takeoff -> Fly to the first GPS setpoint -> begin tracking (if lost target for a period, auto fly to the next GPS setpoint defined in `config/tracking_param_sitl.yaml`)
 
    ```bash
-   rostopic pub /cmd std_msgs/Int32 "data: 1" # UAV takeoff
-   rostopic pub /cmd std_msgs/Int32 "data: 6" # UAV return
+   rostopic pub /jc_cmd std_msgs/Int32 "data: 0" # UAV wait
+   rostopic pub /jc_cmd std_msgs/Int32 "data: 1" # UAV takeoff
+   rostopic pub /jc_cmd std_msgs/Int32 "data: 6" # UAV return
    ```
 
 5. Move the UGV to see the tracking performance:
