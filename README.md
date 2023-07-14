@@ -106,7 +106,7 @@ echo "source ~/UAVros/devel/setup.bash" >> ~/.bashrc
 
 A landing service is also provided in `landing_service.cpp` for UAV that is in offboard mode and suitable height to call to land.
 
-<img src="pictures/uav_land_ar_tag.png" alt="img" align="left"  style="zoom: 25%;" />
+![img](pictures/uav_land_ar_tag.png)
 
 
 
@@ -125,7 +125,7 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
 
 4. Select the ROI area in the tracking window, then the UAV will begin tracking the target ROI.
 
-<img src="pictures/uav_kcf_track.png" alt="img" align="left"  style="zoom: 20%;" />
+![img](pictures/uav_kcf_track.png)
 
 
 
@@ -153,9 +153,9 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
    ```
    The rover UGV and UAVs simulation video: https://www.bilibili.com/video/BV1U44y1r7ey/
 
-<img src="pictures/uavugv_racer.png" alt="img" align="left"  style="zoom: 40%;" />
+![img](pictures/uavugv_racer.png)
 
-<img src="pictures/uavugv_rover.png" alt="img" align="left"  style="zoom: 18%;" />
+![img](pictures/uavugv_rover.png)
 
 
 
@@ -193,4 +193,4 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
       z: 0.0" -r 10
     ```
 
-<img src="pictures/wrzf_2021_tracking.png" alt="img" align="left"  style="zoom: 40%;" />
+![img](pictures/wrzf_2021_tracking.png)
