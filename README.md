@@ -110,6 +110,7 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
 
 
 
+
 ### UAV KCF tracking target
 
 1. Launch the sitl simulation:
@@ -124,8 +125,8 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
 
 4. Select the ROI area in the tracking window, then the UAV will begin tracking the target ROI.
 
+<img src="pictures/uav_kcf_track.png" alt="img" align="left"  style="zoom: 20%;" />
 
-​       <img src="pictures/uav_kcf_track.png" alt="img" align="left"  style="zoom: 20%;" />
 
 
 
@@ -150,13 +151,12 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
    rostopic pub /cmd std_msgs/Int32 "data: 1" # begin formation
    rostopic pub /cmd std_msgs/Int32 "data: 0" # stop formation
    ```
-   The rover UGV and UAVs simulation video:
+   The rover UGV and UAVs simulation video: https://www.bilibili.com/video/BV1U44y1r7ey/
 
-   https://www.bilibili.com/video/BV1U44y1r7ey/
+<img src="pictures/uavugv_racer.png" alt="img" align="left"  style="zoom: 40%;" />
 
-​        <img src="pictures/uavugv_racer.png" alt="img" align="left"  style="zoom: 40%;" />
+<img src="pictures/uavugv_rover.png" alt="img" align="left"  style="zoom: 18%;" />
 
-​        <img src="pictures/uavugv_rover.png" alt="img" align="left"  style="zoom: 18%;" />
 
 
 
@@ -192,5 +192,5 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
       y: 0.0
       z: 0.0" -r 10
     ```
-    
-​        <img src="pictures/wrzf_2021_tracking.png" alt="img" align="left"  style="zoom: 40%;" />
+
+<img src="pictures/wrzf_2021_tracking.png" alt="img" align="left"  style="zoom: 40%;" />
