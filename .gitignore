@@ -1,0 +1,8 @@
+# git ignore the following folders:
+/build
+/devel
+/.catkin_workspace
+/.catkin_tools
+.vscode
+*.egg-info
+__pycache__

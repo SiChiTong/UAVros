@@ -15,12 +15,13 @@
     </include>
 
     <node pkg="uavros_wrzf_sitl" type="uav_controller_node" name="uav_controller" output="screen">
-        <rosparam command="load" file="$(find uavros_wrzf_sitl)/config/tracking_param.yaml" />
+        <rosparam command="load" file="$(find uavros_wrzf_sitl)/config/tracking_param_sitl.yaml" />
     </node>
 
-    <node pkg="uavros_wrzf_sitl" type="message_jc2fk.py" name="message_jc2fk" output="screen">
+    <!-- Read from script/jc2fk.txt and send 0 (wait), 1 (takeoff) or 6 (return) to topic /jc_cmd -->
+    <!-- node pkg="uavros_wrzf_sitl" type="message_jc2fk.py" name="message_jc2fk" output="screen">
 	<param name="txt_filepath" value = "$(find uavros_wrzf_sitl)/script/jc2fk.txt"/>
-    </node>
+    </node-->
 
     <node pkg="uavros_wrzf_sitl" type="broadcast_position.py" name="broadcast_position" output="screen">
 	<param name="json_filepath" value = "$(find uavros_wrzf_sitl)/script/position.json"/>

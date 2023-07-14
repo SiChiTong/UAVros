@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!-- 10车编队 -->
+<launch>
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <!-- <arg name="world_name" default="$(find nexus_gazebo)/worlds/nexus_4wd_mecanum.world" /> -->
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="0" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="use_sim_time" value="$(arg use_sim_time)" />
+    <arg name="headless" value="$(arg headless)" />
+    <!-- <arg name="world_name" value="$(arg world_name)" /> -->
+    <arg name="paused" value="false"/>
+  </include>
+  
+  <!-- spawn "car0" robot -->
+  <!-- <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch"> -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car0" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="0" />
+  </include>
+
+  <!-- spawn "car1" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car1" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="1" />
+  </include>
+
+  <!-- spawn "car2" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car2" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="2" />
+  </include>
+
+  <!-- spawn "car3" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car3" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="3" />
+  </include>
+
+  <!-- spawn "car4" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car4" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="4" />
+  </include>
+
+  <!-- spawn "car5" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car5" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="5" />
+  </include>
+
+  <!-- spawn "car6" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car6" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="6" />
+  </include>
+
+  <!-- spawn "car7" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car7" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="7" />
+  </include>
+
+  <!-- spawn "car8" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car8" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="8" />
+  </include>
+
+  <!-- spawn "car9" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="car9" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="9" />
+  </include>
+
+</launch>

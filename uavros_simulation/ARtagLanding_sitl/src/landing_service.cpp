@@ -233,7 +233,11 @@ void PX4Landing::LandingStateUpdate()
 			{
 				LandingState = SEARCH;
 				cout << "LandingState: SEARCH" <<endl;
-			}		
+			}
+			else
+			{
+				cout << "[Warn] Height not near the search_alt_ " << search_alt_ <<endl;
+			}
 			if(last_px4_state_.mode == "OFFBOARD" && px4_state_.mode != "OFFBOARD")
 			{ //如果在准备中途中退出offboard切换到手动，则跳到WAITING 
 				LandingState = WAITING;

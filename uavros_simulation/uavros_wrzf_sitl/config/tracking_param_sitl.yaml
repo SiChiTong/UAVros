@@ -2,21 +2,22 @@
 loop_sec : 0.05
 Mission_sec : 380.0
 
-auto_arm : false
+auto_arm : true
 en_preset_mode : true
 en_yaw_rotate : true
 
 lost_sec_thre : 7.0
 v_thres_yawrotate : 1.7 # m/s
 
+hover_yaw_rad : -2.283 #-3.1415 ~ 3.1415
+
+
 arrive_alt : 3.0
 track_alt : 6.0
 
-hover_yaw_rad : -2.283 #-3.1415 ~ 3.1415
-
 vxy_max : 2.0
-acc_max : 100.0
-Kp : 1.5
+acc_max : 6.0
+Kp : 0.5
 Ki : 0.0
 Kd : 0.0
 

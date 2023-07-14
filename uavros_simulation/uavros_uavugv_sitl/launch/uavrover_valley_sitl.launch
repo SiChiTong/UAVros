@@ -17,7 +17,7 @@
         <arg name="cam_namespace" value="$(arg ns1)"/>
         <arg name="x_pos" value="-17.201330"/>
         <arg name="y_pos" value="-42.871709"/>
-        <arg name="z_pos" value="1.283637"/>
+        <arg name="z_pos" value="1.383637"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
             <arg name="x" value="$(arg x_pos)"/>
@@ -112,7 +112,7 @@
         <arg name="cam_namespace" value="$(arg ns2)"/>
         <arg name="x_pos" value="-17.692197"/>
         <arg name="y_pos" value="-43.451849"/>
-        <arg name="z_pos" value="1.310462"/>
+        <arg name="z_pos" value="1.410462"/>
         <!-- PX4 SITL and vehicle spawn -->
         <include file="$(find uavros_gazebo)/launch/single_iris_usbcam_down.launch">
             <arg name="x" value="$(arg x_pos)"/>

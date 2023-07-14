@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <!-- <arg name="world_name" default="$(find nexus_gazebo)/worlds/nexus_4wd_mecanum.world" /> -->
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="0" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="use_sim_time" value="$(arg use_sim_time)" />
+    <arg name="headless" value="$(arg headless)" />
+    <!-- <arg name="world_name" value="$(arg world_name)" /> -->
+    <arg name="paused" value="false"/>
+  </include>
+  
+  <!-- spawn "leader1" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="leader1" />
+    <arg name="pose_x" value="1" />
+    <arg name="pose_y" value="0" />
+  </include>
+
+  <!-- spawn "leader2" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="leader2" />
+    <arg name="pose_x" value="-1" />
+    <arg name="pose_y" value="0" />
+  </include>
+
+  <!-- spawn "follower1" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="follower1" />
+    <arg name="pose_x" value="1" />
+    <arg name="pose_y" value="1" />
+  </include>
+
+  <!-- spawn "follower2" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="follower2" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="1" />
+  </include>
+
+  <!-- spawn "follower3" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="follower3" />
+    <arg name="pose_x" value="-1" />
+    <arg name="pose_y" value="1" />
+  </include>
+
+  <!-- spawn "target" robot -->
+  <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+    <arg name="robot_name" value="target" />
+    <arg name="pose_x" value="0" />
+    <arg name="pose_y" value="2" />
+  </include>
+
+</launch>
