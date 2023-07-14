@@ -106,7 +106,7 @@ echo "source ~/UAVros/devel/setup.bash" >> ~/.bashrc
 
 A landing service is also provided in `landing_service.cpp` for UAV that is in offboard mode and suitable height to call to land. This service is used in `uavrover_sitl.launch`  of "Multi-UAV formation tracking UGV".
 
-![img](pictures/uav_land_ar_tag.png)
+![img](pictures/uav_land_ar_tag.jpg)
 
 
 
@@ -125,7 +125,7 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
 
 4. Select the ROI area in the tracking window, then the UAV will begin tracking the target ROI.
 
-![img](pictures/uav_kcf_track.png)
+![img](pictures/uav_kcf_track.jpg)
 
 
 
@@ -153,9 +153,9 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
    ```
    The rover UGV and UAVs simulation video: https://www.bilibili.com/video/BV1U44y1r7ey/
 
-![img](pictures/uavugv_racer.png)
+![img](pictures/uavugv_racer.jpg)
 
-![img](pictures/uavugv_rover.png)
+![img](pictures/uavugv_rover.jpg)
 
 
 
@@ -194,4 +194,4 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
       z: 0.0" -r 10
     ```
 
-![img](pictures/wrzf_2021_tracking.png)
+![img](pictures/wrzf_2021_tracking.jpg)
