@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+
+<!-- yjl-szx cooperative guidance akerman -->
+
+<!-- ackermann_vehicle.launch
+
+Use Gazebo to simulate a vehicle with Ackermann steering.
+
+Arguments:
+    namespace (string, default: ackermann_vehicle)
+        Vehicle namespace.
+    world_name (string, default: worlds/empty.world)
+        Gazebo world name.
+    cmd_timeout (double, default: 0.5)
+        Command timeout passed to the ackermann_controller node.
+    x (double, default: 0.0)
+    y (double, default: 0.0)
+    z (double, default: 0.1)
+    roll (double, default: 0.0)
+    pitch (double, default: 0.0)
+    yaw (double, default: 0.0)
+        Vehicle pose. x, y, and z are measured in meters. roll, pitch, and yaw
+        are measured in radians.
+
+Copyright (c) 2013-2015 Wunderkammer Laboratory
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<launch>
+  <arg name="use_sim_time" default="true" />
+  <arg name="gui" default="true" />
+  <arg name="headless" default="false" />
+  <arg name="cmd_timeout" default="0.5"/>
+  <arg name="ns1" default="car1" />
+  <arg name="ns2" default="car2" />
+  <arg name="ns3" default="car3" />
+  <arg name="ns4" default="car4" />
+
+  <!-- Create the world. -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="0" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="use_sim_time" value="$(arg use_sim_time)" />
+    <arg name="headless" value="$(arg headless)" />
+    <arg name="paused" value="false"/>
+  </include>
+
+  <!-- Spawn the vehicle1. -->
+  <include file="$(find ackermann_vehicle_description)/launch/ackermann_vehicle.launch">
+    <arg name="namespace" value="$(arg ns1)"/>
+  </include>
+  <include file="$(find ackermann_vehicle_navigation)/launch/cmd_vel_to_ackermann_drive.launch">
+    <arg name="namespace" value="$(arg ns1)"/>
+  </include>
+  <group ns="$(arg ns1)">
+    <arg name="x1" default="1.0"/>	<!-- x/m -->
+    <arg name="y1" default="1.0"/>
+    <arg name="z1" default="0.1"/>
+    <arg name="roll1" default="0.0"/>
+    <arg name="pitch1" default="0.0"/>
+    <arg name="yaw1" default="0.0"/>	<!-- yaw/rad -->
+    <node name="spawn_vehicle" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model $(arg ns1)
+                -gazebo_namespace /gazebo
+                -x $(arg x1) -y $(arg y1) -z $(arg z1)
+                -R $(arg roll1) -P $(arg pitch1) -Y $(arg yaw1)"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"
+          args="$(find ackermann_vehicle_gazebo)/config/em_3905_joint_ctrlr_params.yaml"/>
+    <node name="ackermann_controller" pkg="ackermann_vehicle_gazebo"
+          type="ackermann_controller">
+      <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
+      <rosparam file="$(find ackermann_vehicle_gazebo)/config/em_3905_ackermann_ctrlr_params.yaml" command="load"/>
+    </node>
+  </group>
+
+  <!-- Spawn the vehicle2. -->
+  <include file="$(find ackermann_vehicle_description)/launch/ackermann_vehicle.launch">
+    <arg name="namespace" value="$(arg ns2)"/>
+  </include>
+  <include file="$(find ackermann_vehicle_navigation)/launch/cmd_vel_to_ackermann_drive.launch">
+    <arg name="namespace" value="$(arg ns2)"/>
+  </include>
+  <group ns="$(arg ns2)">
+    <arg name="x2" default="1.0"/>	<!-- x/m -->
+    <arg name="y2" default="2.0"/>
+    <arg name="z2" default="0.1"/>
+    <arg name="roll2" default="0.0"/>
+    <arg name="pitch2" default="0.0"/>
+    <arg name="yaw2" default="0.0"/>	<!-- yaw/rad -->
+    <node name="spawn_vehicle" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model $(arg ns2)
+                -gazebo_namespace /gazebo
+                -x $(arg x2) -y $(arg y2) -z $(arg z2)
+                -R $(arg roll2) -P $(arg pitch2) -Y $(arg yaw2)"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"
+          args="$(find ackermann_vehicle_gazebo)/config/em_3905_joint_ctrlr_params.yaml"/>
+    <node name="ackermann_controller" pkg="ackermann_vehicle_gazebo"
+          type="ackermann_controller">
+      <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
+      <rosparam file="$(find ackermann_vehicle_gazebo)/config/em_3905_ackermann_ctrlr_params.yaml" command="load"/>
+    </node>
+  </group>
+
+  <!-- Spawn the vehicle3. -->
+  <include file="$(find ackermann_vehicle_description)/launch/ackermann_vehicle.launch">
+    <arg name="namespace" value="$(arg ns3)"/>
+  </include>
+  <include file="$(find ackermann_vehicle_navigation)/launch/cmd_vel_to_ackermann_drive.launch">
+    <arg name="namespace" value="$(arg ns3)"/>
+  </include>
+  <group ns="$(arg ns3)">
+    <arg name="x3" default="1.0"/>	<!-- x/m -->
+    <arg name="y3" default="3.0"/>
+    <arg name="z3" default="0.1"/>
+    <arg name="roll3" default="0.0"/>
+    <arg name="pitch3" default="0.0"/>
+    <arg name="yaw3" default="0.0"/>	<!-- yaw/rad -->
+    <node name="spawn_vehicle" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model $(arg ns3)
+                -gazebo_namespace /gazebo
+                -x $(arg x3) -y $(arg y3) -z $(arg z3)
+                -R $(arg roll3) -P $(arg pitch3) -Y $(arg yaw3)"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"
+          args="$(find ackermann_vehicle_gazebo)/config/em_3905_joint_ctrlr_params.yaml"/>
+    <node name="ackermann_controller" pkg="ackermann_vehicle_gazebo"
+          type="ackermann_controller">
+      <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
+      <rosparam file="$(find ackermann_vehicle_gazebo)/config/em_3905_ackermann_ctrlr_params.yaml" command="load"/>
+    </node>
+  </group>
+
+  <!-- Spawn the vehicle4. -->
+  <include file="$(find ackermann_vehicle_description)/launch/ackermann_vehicle.launch">
+    <arg name="namespace" value="$(arg ns4)"/>
+  </include>
+  <include file="$(find ackermann_vehicle_navigation)/launch/cmd_vel_to_ackermann_drive.launch">
+    <arg name="namespace" value="$(arg ns4)"/>
+  </include>
+  <group ns="$(arg ns4)">
+    <arg name="x4" default="1.0"/>	<!-- x/m -->
+    <arg name="y4" default="4.0"/>
+    <arg name="z4" default="0.1"/>
+    <arg name="roll4" default="0.0"/>
+    <arg name="pitch4" default="0.0"/>
+    <arg name="yaw4" default="0.0"/>	<!-- yaw/rad -->
+    <node name="spawn_vehicle" pkg="gazebo_ros" type="spawn_model"
+          args="-urdf -param robot_description -model $(arg ns4)
+                -gazebo_namespace /gazebo
+                -x $(arg x4) -y $(arg y4) -z $(arg z4)
+                -R $(arg roll4) -P $(arg pitch4) -Y $(arg yaw4)"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner"
+          args="$(find ackermann_vehicle_gazebo)/config/em_3905_joint_ctrlr_params.yaml"/>
+    <node name="ackermann_controller" pkg="ackermann_vehicle_gazebo"
+          type="ackermann_controller">
+      <param name="cmd_timeout" value="$(arg cmd_timeout)"/>
+      <rosparam file="$(find ackermann_vehicle_gazebo)/config/em_3905_ackermann_ctrlr_params.yaml" command="load"/>
+    </node>
+  </group>
+
+</launch>

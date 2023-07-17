@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="namespace" default="car1"/>
+  <node pkg="ackermann_vehicle_navigation" type="cmd_vel_to_ackermann_drive.py" name="$(arg namespace)_cmd_vel_to_ackermann" output="screen">
+    <param name="twist_cmd_topic" value="/$(arg namespace)/cmd_vel"/>
+    <param name="ackermann_cmd_topic" value="/$(arg namespace)/ackermann_cmd"/>
+  </node>
+
+</launch>
