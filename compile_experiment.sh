@@ -2,7 +2,7 @@
 catkin_make --source uavros_msgs --build build/uavros_msgs
 
 # function
-catkin_make --source ar_track_alvar --build build/ar_track_alvar
+catkin_make --source dependenct_packages/ar_track_alvar --build build/ar_track_alvar
 catkin_make --source uavros_experiment/ARtagLanding --build build/uavros_artaglanding
 
 # function

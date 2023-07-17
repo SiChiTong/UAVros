@@ -8,12 +8,12 @@ catkin_make --source uavros_simulation/uavros_gazebo --build build/uavros_gazebo
 catkin_make --source uavros_simulation/kcffollow_simulation --build build/uavros_kcffollow_simulation
 
 # function
-catkin_make --source ar_track_alvar --build build/ar_track_alvar
+catkin_make --source dependenct_packages/ar_track_alvar --build build/ar_track_alvar
 catkin_make --source uavros_simulation/ARtagLanding_sitl --build build/uavros_artaglanding_sitl
 
 # function
 catkin_make --source uavros_simulation/uavros_uavugv_sitl --build build/uavros_uavugv_sitl
 
 # function
-catkin_make --source ugv_simulator --build build/ugv_simulator
+catkin_make --source dependenct_packages/ugv_simulator --build build/ugv_simulator
 catkin_make --source uavros_simulation/uavros_wrzf_sitl --build build/uavros_wrzf_sitl
