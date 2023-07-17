@@ -15,10 +15,10 @@ Several simulation examples are given in the form of ROS packages under the fold
 
 | ROS Module | PX4 version | Function|
 | ------ | ----------- | ------- |
-| [ARtagLanding_sitl](#UAV-landing-on-AR-tag) | v1.11.3, v1.12.0-beta3, v1.13.3| Single UAV lands on an AR tag based on the visual servo using downward camera |
-| [kcffollow_simulation](#UAV-KCF-tracking-target) | v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks AR tag using downward camera and KCF tracking algorithm |
-| [uavros_uavugv_sitl](#Multi-UAV-formation-tracking-UGV) |  v1.11.3, v1.12.0-beta3, v1.13.3  | Two UAVs fly around the UGV in a spinning circle formation |
-| [uavros_wrzf_sitl](#UAV-tracking-GPS-points-and-UGV) |  v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks the UGV based on the color detection using downward camera |
+| [ARtagLanding_sitl](#uav-landing-on-ar-tag) | v1.11.3, v1.12.0-beta3, v1.13.3| Single UAV lands on an AR tag based on the visual servo using downward camera |
+| [kcffollow_simulation](#uav-kcf-tracking-target) | v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks AR tag using downward camera and KCF tracking algorithm |
+| [uavros_uavugv_sitl](#multi-uav-formation-tracking-ugv) |  v1.11.3, v1.12.0-beta3, v1.13.3  | Two UAVs fly around the UGV in a spinning circle formation |
+| [uavros_wrzf_sitl](#uav-tracking-gps-points-and-ugv) |  v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks the UGV based on the color detection using downward camera |
 | uavros_multi_gimbal_sitl | v1.11.3, v1.14 | Multi-UAV with gimbal cameras cooperatively search and track target |
 | uavros_gazebo | > v1.11.3 | Gazebo simulation modules |
 
