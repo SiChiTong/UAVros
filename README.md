@@ -6,26 +6,27 @@ UAVros contains multiple ROS packages for PX4-gazebo simulation and experiment. 
 
 - v1.11.3
 - v1.12.0-beta3
-- v1.13.3 (under test)
+- v1.13.3
+- v1.14 (under test)
 
 Environment: ubuntu18.04 or ubuntu 20.04 with ROS1.
 
 Several simulation examples are given in the form of ROS packages under the folder `uavros_simulation/`:
 
-| Module | Function|
-| ---| -------------------|
-| ARtagLanding_sitl | Single UAV lands on an AR tag based on the visual servo using downward camera |
-| kcffollow_simulation | Single UAV tracks AR tag using downward camera and KCF tracking algorithm |
-| uavros_uavugv_sitl | Two UAVs fly around the UGV in a spinning circle formation |
-| uavros_wrzf_sitl | Single UAV tracks the UGV based on the color detection using downward camera |
-| uavros_gazebo | Gazebo simulation modules |
+| ROS Module | PX4 version | Function|
+| ------ | ----------- | ------- |
+| ARtagLanding_sitl | v1.11.3, v1.12.0-beta3, v1.13.3| Single UAV lands on an AR tag based on the visual servo using downward camera |
+| kcffollow_simulation | v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks AR tag using downward camera and KCF tracking algorithm |
+| uavros_uavugv_sitl |  v1.11.3, v1.12.0-beta3, v1.13.3  | Two UAVs fly around the UGV in a spinning circle formation |
+| uavros_wrzf_sitl |  v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks the UGV based on the color detection using downward camera |
+| uavros_gazebo | v1.13.3, v1.14 | Gazebo simulation modules |
 
 ## Install
 
 Install PX4:
 
 ```bash
-# clone px4 and make
+### clone px4 and make
 git clone https://github.com/PX4/PX4-Autopilot.git
 cd PX4-Autopilot
 git checkout v1.13.3 # or other version
@@ -34,11 +35,18 @@ bash Tools/setup/ubuntu.sh # make sure all dependencies are installed successful
 # reboot the computer, then:
 make px4_sitl gazebo
 
-# add source path in .bashrc
+### add source path in .bashrc
+# if you use px4 version v1.13 or lower:
 echo "
 source ~/PX4-Autopilot/Tools/setup_gazebo.bash ~/PX4-Autopilot ~/PX4-Autopilot/build/px4_sitl_default
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot/Tools/sitl_gazebo
+" >> ~/.bashrc
+# if you use px4 version v1.14:
+echo "
+source ~/PX4-Autopilot/Tools/simulation/gazebo-classic/setup_gazebo.bash ~/PX4-Autopilot ~/PX4-Autopilot/build/px4_sitl_default
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot/Tools/simulation/gazebo-classic/sitl_gazebo-classic
 " >> ~/.bashrc
 ```
 
