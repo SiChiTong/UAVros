@@ -1,0 +1,26 @@
+<launch>
+
+    <arg name="ns0" value= "uav0"/>
+    <arg name="ns1" value= "uav1"/>
+    <arg name="ns2" value= "uav2"/>
+
+    <group ns="$(arg ns0)">
+        <arg name="ID" value="0"/>
+        <!-- Gimbal topic forward node -->
+        <node pkg="uavros_gazebo" type="gimbal_topic_forward.py" name="gimbal_topic_forward" output="screen">
+            <param name="model_name" value = "solo_gimbal"/>
+            <param name="model_id" value = "$(arg ID)"/>
+        </node>
+    </group>
+
+    <group ns="$(arg ns1)">
+        <arg name="ID" value="1"/>
+        <!-- Gimbal topic forward node -->
+        <node pkg="uavros_gazebo" type="gimbal_topic_forward.py" name="gimbal_topic_forward" output="screen">
+            <param name="model_name" value = "solo_gimbal"/>
+            <param name="model_id" value = "$(arg ID)"/>
+        </node>
+    </group>
+
+
+</launch>

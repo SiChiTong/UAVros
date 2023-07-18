@@ -1,28 +1,11 @@
 <sdf version='1.5'>
   <model name='solo_gimbal'>
 
-<!-- joint between gimbal mount and "solo" uav base_link-->
-    <joint name="cgo3_mount_joint" type="fixed">
-      <child>gimbal::cgo3_mount_link</child>
-      <parent>base_link</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
-        <limit>
-          <upper>0</upper>
-          <lower>0</lower>
-        </limit>
-      </axis>
-    </joint>
-
 <!-- gimbal model -->
-  <model name="gimbal">
-    <!-- modify the gimbal pose here -->
-    <pose>0.08 0 -0.01 0 0 0</pose>
-
     <link name="cgo3_mount_link">
       <inertial>
         <!-- place holder -->
-        <pose>-0.041 0 -0.082 0 0 0</pose>
+        <pose>0.039 0 -0.092 0 0 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>0.001</ixx>
@@ -34,7 +17,7 @@
         </inertia>
       </inertial>
       <visual name='cgo3_mount_visual'>
-        <pose>0 0 0.08 0 0 0</pose>
+        <pose>0.08 0 0.07 0 0 0</pose>
         <geometry>
           <mesh>
             <scale>0.001 0.001 0.001</scale>
@@ -49,10 +32,21 @@
         </material>
       </visual>
     </link>
+    <joint name="cgo3_mount_joint" type="fixed">
+      <child>cgo3_mount_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <upper>0</upper>
+          <lower>0</lower>
+        </limit>
+      </axis>
+    </joint>
 
     <link name="cgo3_vertical_arm_link">
       <inertial>
-        <pose>-0.041 0 -0.082 0 0 0</pose>
+        <pose>0.039 0 -0.092 0 0 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>0.001</ixx>
@@ -64,7 +58,7 @@
         </inertia>
       </inertial>
       <visual name='cgo3_vertical_arm_visual'>
-        <pose>-0.051 0 0.08 0 0 3.141592</pose>
+        <pose>0.029 0 0.07 0 0 3.141592</pose>
         <geometry>
           <mesh>
             <scale>0.001 0.001 0.001</scale>
@@ -82,12 +76,12 @@
     <joint name='cgo3_vertical_arm_joint' type='revolute'>
       <child>cgo3_vertical_arm_link</child>
       <parent>cgo3_mount_link</parent>
-      <pose>-0.026 0 -0.02 0 0 0</pose>
+      <pose>0.054 0 -0.03 0 0 0</pose>
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.0472</lower> <!-- -60 deg -->
-          <upper>1.0472</upper> <!-- 60 deg -->
+          <lower>-1e+16</lower> <!-- yaw -1.0472 -60 deg -->
+          <upper>1e+16</upper> <!-- yaw 1.0472 60 deg -->
           <effort>100</effort>
           <velocity>-1</velocity>
         </limit>
@@ -110,7 +104,7 @@
 
     <link name="cgo3_horizontal_arm_link">
       <inertial>
-        <pose>-0.041 0 -0.001 0 0 0</pose>
+        <pose>0.039 0 -0.011 0 0 0</pose>
         <mass>0.01</mass>
         <inertia>
           <ixx>0.001</ixx>
@@ -122,7 +116,7 @@
         </inertia>
       </inertial>
       <visual name='cgo3_horizontal_arm_visual'>
-        <pose>-0.05 0 0.08 0 0 3.141592</pose>
+        <pose>0.03 0 0.07 0 0 3.141592</pose>
         <geometry>
           <mesh>
             <scale>0.001 0.001 0.001</scale>
@@ -140,12 +134,12 @@
     <joint name='cgo3_horizontal_arm_joint' type='revolute'>
       <child>cgo3_horizontal_arm_link</child>
       <parent>cgo3_vertical_arm_link</parent>
-      <pose>-0.07 0 -0.082 0 0 0</pose>
+      <pose>0.01 0 -0.092 0 0 0</pose>
       <axis>
         <xyz>-1 0 0</xyz>
         <limit>
-          <lower>-0.785398</lower> <!-- -45 deg -->
-          <upper>0.785398</upper> <!-- 45 deg -->
+          <lower>-0.785398</lower> <!-- roll -45 deg -->
+          <upper>0.785398</upper> <!-- roll 45 deg -->
           <effort>100</effort>
           <velocity>-1</velocity>
         </limit>
@@ -168,7 +162,7 @@
 
     <link name="cgo3_camera_link">
       <inertial>
-        <pose>-0.041 0 -0.082 0 0 0</pose>
+        <pose>0.039 0 -0.092 0 0 0</pose>
         <mass>0.08</mass>
         <inertia>
           <ixx>0.001</ixx>
@@ -180,7 +174,7 @@
         </inertia>
       </inertial>
       <!--collision name='cgo3_camera_collision'>
-        <pose>-0.041 0 -0.082 0 0 0</pose>
+        <pose>0.039 0 -0.092 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>0.035</radius>
@@ -204,7 +198,7 @@
         </surface>
       </collision-->
       <visual name='cgo3_camera_visual'>
-        <pose>-0.05 0 0.08 0 0 3.141592</pose>
+        <pose>0.03 0 0.07 0 0 3.141592</pose>
         <geometry>
           <mesh>
             <scale>0.001 0.001 0.001</scale>
@@ -222,7 +216,7 @@
         <always_on>1</always_on>
       </sensor>
       <sensor name="camera" type="camera">
-        <pose>0.0 0 -0.082 0 0 0</pose>
+        <pose>0.08 0 -0.092 0 0 0</pose>
         <camera>
           <horizontal_fov>2.18</horizontal_fov>
           <image>
@@ -281,12 +275,12 @@
     <joint name='cgo3_camera_joint' type='revolute'>
       <child>cgo3_camera_link</child>
       <parent>cgo3_horizontal_arm_link</parent>
-      <pose>-0.01 0.03 -0.082 0 0 0</pose>
+      <pose>0.07 0.03 -0.092 0 0 0</pose>
       <axis>
         <xyz>0 -1 0</xyz>
         <limit>
-          <lower>-2.0944</lower> <!-- -90-30 deg-->
-          <upper>0.6981</upper> <!-- 30+10 deg -->
+          <lower>-2.0944</lower> <!-- pitch -90-30 deg-->
+          <upper>0.6981</upper> <!-- pitch 30+10 deg -->
           <effort>100</effort>
           <velocity>-1</velocity>
         </limit>
@@ -352,7 +346,6 @@
       </control_gimbal_channels>
       <gimbal_imu>camera_imu</gimbal_imu>
     </plugin>
-  </model>
 
 <!--the rest is solo model-->
     <!-- Solo body -->

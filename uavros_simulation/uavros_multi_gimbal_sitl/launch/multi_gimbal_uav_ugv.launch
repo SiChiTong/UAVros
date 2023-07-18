@@ -8,6 +8,14 @@
     <arg name="vehicle" default="solo_gimbal"/>
   	<arg name="sdf" default="$(find uavros_gazebo)/models/solo_gimbal/solo_gimbal.sdf"/>
 
+    <!-- spawn "ugv0" robot -->
+    <!-- <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch"> -->
+    <include file="$(find nexus_4wd_mecanum_gazebo)/launch/spawn_one_nexus_4wd_mecanum.launch">
+        <arg name="robot_name" value="ugv0" />
+        <arg name="pose_x" value="3" />
+        <arg name="pose_y" value="2" />
+    </include>
+
     <arg name="ns0" value= "uav0"/>
     <arg name="ns1" value= "uav1"/>
     <arg name="ns2" value= "uav2"/>
@@ -82,6 +90,19 @@
         <!-- Function node -->
     </group>
 
+
+  <arg name="visualization" default="true"/>
+  <group if="$(arg visualization)">
+      <node type="rviz" name="rviz" pkg="rviz" args="-d $(find uavros_multi_gimbal_sitl)/config/rviz_gimbal_images.rviz" />
+  </group>
+
+  <arg name="rqt_image" default="false"/>
+  <group if="$(arg rqt_image)">
+    <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view1" output="screen">
+    </node>
+    <node pkg="rqt_image_view" type="rqt_image_view" name="rqt_image_view2" output="screen">
+    </node>
+  </group>
 
 
 </launch>

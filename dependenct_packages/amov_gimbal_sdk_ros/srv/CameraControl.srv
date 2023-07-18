@@ -1,0 +1,6 @@
+#mode 0:Record and stop recording
+#1:Take a picture
+
+uint8 camera_action
+---
+bool stateResponse

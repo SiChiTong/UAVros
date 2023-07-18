@@ -24,26 +24,49 @@ Several simulation examples are given in the form of ROS packages under the fold
 
 ## Install
 
-Install PX4:
+Install ROS1:
 
 ```bash
-### clone px4 and make
+sudo sh -c '. /etc/lsb-release && echo "deb http://mirrors.ustc.edu.cn/ros/ubuntu/ `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
+wget https://gitee.com/shu-peixuan/px4mocap/blob/master/ROS-install-command/ros.key
+sudo apt-key add ros.key
+sudo apt-get update --fix-missing
+sudo apt install ros-noetic-desktop # for ubuntu 20
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc # for ubuntu 20
+# sudo apt install ros-melodic-desktop # for ubuntu 18
+# echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc # for ubuntu 18
+```
+
+Install mavros:
+
+```bash
+sudo apt install ros-noetic-mavros ros-noetic-mavros-extras # for ubuntu 20
+# sudo apt install ros-melodic-mavros ros-melodic-mavros-extras  # for ubuntu 18
+wget https://gitee.com/shu-peixuan/px4mocap/blob/master/ROS-install-command/install_geographiclib_datasets.sh
+sudo chmod a+x ./install_geographiclib_datasets.sh
+sudo ./install_geographiclib_datasets.sh # this step takes some time
+```
+
+Install PX4 Autopilot project:
+
+```bash
+cd ~
 git clone https://github.com/PX4/PX4-Autopilot.git
 cd PX4-Autopilot
 git checkout v1.13.3 # or other version
 git submodule update --init --recursive
-bash Tools/setup/ubuntu.sh # make sure all dependencies are installed successfully!
+bash Tools/setup/ubuntu.sh # This step takes some time. Make sure all dependencies are installed successfully!
 # reboot the computer, then:
 make px4_sitl gazebo
 
-### add source path in .bashrc
-# if you use px4 version v1.13 or lower:
+### if you use px4 version v1.13 or lower:
 echo "
 source ~/PX4-Autopilot/Tools/setup_gazebo.bash ~/PX4-Autopilot ~/PX4-Autopilot/build/px4_sitl_default
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot/Tools/sitl_gazebo
 " >> ~/.bashrc
-# if you use px4 version v1.14:
+
+### if you use px4 version v1.14:
 echo "
 source ~/PX4-Autopilot/Tools/simulation/gazebo-classic/setup_gazebo.bash ~/PX4-Autopilot ~/PX4-Autopilot/build/px4_sitl_default
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:~/PX4-Autopilot
@@ -55,35 +78,32 @@ Install dependencies:
 
 ```bash
 sudo apt install xmlstarlet # generate multiple UAV sdf model
-# For numba on arm ubuntu, refer to https://blog.csdn.net/benchuspx/article/details/109152810
-# install numba on x86 ubuntu:
-sudo apt-get install llvm # for KCF tracking
-pip install llvmlite # for KCF tracking
-pip install numba # for KCF tracking
 
-### ROS melodic:
-sudo apt install ros-melodic-ar-track-alvar # AR tag detection
-sudo apt install ros-melodic-ackermann-msgs # ackermann UGV control
-sudo apt install ros-melodic-usb-cam  # usb camera
-sudo apt install ros-melodic-image-proc # image calibrate
-sudo apt install ros-melodic-image-pipeline # image compress and process
-sudo apt install ros-melodic-camera-calibration # camera calibrate
-sudo apt install ros-melodic-effort-controllers # racer model control
-sudo apt install ros-melodic-plotjuggler-ros # curve plot and display
-### ROS noetic:
-# ROS noetic apt does not have ar-track-alvar, compile the local folder.
-sudo apt install ros-noetic-ackermann-msgs # ackermann UGV control
-sudo apt install ros-noetic-usb-cam # usb camera
-sudo apt install ros-noetic-image-proc # image calibrate
-sudo apt install ros-noetic-image-pipeline # image compress and process
-sudo apt install ros-noetic-camera-calibration # camera calibrate
-sudo apt install ros-noetic-effort-controllers # racer model control
-sudo apt install ros-noetic-plotjuggler-ros # curve plot and display
+### for ROS melodic:
+sudo apt install -y ros-melodic-ackermann-msgs ros-melodic-usb-cam ros-melodic-image-proc ros-melodic-image-pipeline ros-melodic-camera-calibration ros-melodic-effort-controllers ros-melodic-plotjuggler-ros ros-melodic-ar-track-alvar 
+
+### for ROS noetic:
+sudo apt install -y ros-noetic-ackermann-msgs # ackermann UGV control
+sudo apt install -y ros-noetic-usb-cam  # usb camera
+sudo apt install -y ros-noetic-image-proc # image calibrate
+sudo apt install -y ros-noetic-image-pipeline # image compress and process
+sudo apt install -y ros-noetic-camera-calibration # camera calibrate
+sudo apt install -y ros-noetic-effort-controllers # racer model control
+sudo apt install -y ros-noetic-plotjuggler-ros # curve plot and display
+# sudo apt install -y ros-melodic-ar-track-alvar # AR tag detection
+# ROS noetic apt does not have ar-track-alvar, compile the local folder instead.
+
+### optional
+sudo apt-get install llvm # install numba on X86 ubuntu for KCF tracking
+pip install llvmlite # install numba on X86 ubuntu for KCF tracking
+pip install numba # install numba on X86 ubuntu for KCF tracking
+# For numba on ARM ubuntu, refer to https://blog.csdn.net/benchuspx/article/details/109152810
 ```
 
 Clone and compile UAVros:
 
 ```bash
+cd ~
 git clone https://gitee.com/shu-peixuan/UAVros.git
 cd UAVros/
 ./compile_all.sh

@@ -17,3 +17,9 @@ catkin_make --source uavros_simulation/uavros_uavugv_sitl --build build/uavros_u
 # function
 catkin_make --source dependenct_packages/ugv_simulator --build build/ugv_simulator
 catkin_make --source uavros_simulation/uavros_wrzf_sitl --build build/uavros_wrzf_sitl
+
+# function
+# catkin_make --source dependenct_packages/ugv_simulator --build build/ugv_simulator
+catkin_make --source dependenct_packages/amov_gimbal_sdk_ros --build build/amov_gimbal_sdk_ros
+catkin_make --source uavros_simulation/uavros_multi_gimbal_sitl --build build/uavros_multi_gimbal_sitl
+
