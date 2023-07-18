@@ -19,7 +19,7 @@ Several simulation examples are given in the form of ROS packages under the fold
 | [kcffollow_simulation](#uav-kcf-tracking-target) | v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks AR tag using downward camera and KCF tracking algorithm |
 | [uavros_uavugv_sitl](#multi-uav-formation-tracking-ugv) |  v1.11.3, v1.12.0-beta3, v1.13.3  | Two UAVs fly around the UGV in a spinning circle formation |
 | [uavros_wrzf_sitl](#uav-tracking-gps-points-and-ugv) |  v1.11.3, v1.12.0-beta3, v1.13.3  | Single UAV tracks the preset GPS setpoints and moving UGV  based on the color detection using downward camera |
-| uavros_multi_gimbal_sitl | v1.13.3, v1.14 | Multi-UAV with gimbal cameras cooperatively search and track target |
+| [uavros_multi_gimbal_sitl](#multi-uav-with-gimbal-cameras) | v1.13.3, v1.14 | Multi-UAV with gimbal cameras cooperatively search and track targets |
 | uavros_gazebo | > v1.11.3 | Gazebo simulation modules |
 
 ## Install
@@ -224,3 +224,77 @@ A landing service is also provided in `landing_service.cpp` for UAV that is in o
     ```
 
 ![img](pictures/wrzf_2021_tracking.jpg)
+
+
+
+### Multi UAV with gimbal cameras
+
+To launch multi-UAV with gimbals, you need to use PX4 v1.14 (under test) or **PX4 v1.13.3 with the following modifications**:
+
+```bash
+# If not in px4 v1.13.3, then you should first:
+cd ~/PX4-Autopilot
+git checkout v1.13.3
+git submodule update --init --recursive
+
+# 1. Substitute the gazebo_gimbal_controller_plugin.cpp (a udp_gimbal_port_remote is added to distinguish between gimbals)
+roscd uavros_gazebo
+cp px4_modification/gazebo_gimbal_controller_plugin.cpp ~/PX4-Autopilot/Tools/sitl_gazebo/src/gazebo_gimbal_controller_plugin.cpp
+# 2. Add airframes (8001_solo_gimbal with gimbal enabled)
+cp -r px4_modification/airframes/* ~/PX4-Autopilot/ROMFS/px4fmu_common/init.d-posix/airframes/
+# 3. Delete px4_sitl_default and remake
+cd ~/PX4-Autopilot
+rm -r build/px4_sitl_default/
+make px4_sitl_default gazebo
+```
+
+Procedures:
+
+1. Launch the sitl simulation:
+
+    ```bash
+    roslaunch uavros_multi_gimbal_sitl multi_gimbal_uav_ugv.launch
+    ```
+    
+2. Open QGroundControl. Click the left-top Q logo -> Vehicle Setup -> Parameters -> search "**COM_RCL_EXCEPT**" and change it to **7**. **Do this for every UAV!** Otherwise the UAV will activate failsafe return mode as there is no manual remote controller input in simulation (bug in px4 1.13.3).
+
+3. The states of the gimbals can be controlled and read by:
+
+    ```bash
+    # echo gimbal angle of uav0
+    rostopic echo /uav0/amov_gimbal_ros/gimbal_state
+    
+    # gimbal angle control of uav0 (angle rate control is invalid):
+    rostopic pub /uav0/amov_gimbal_ros/gimbal_control amov_gimbal_sdk_ros/GimbalControl "header:
+      seq: 0
+      stamp: {secs: 0, nsecs: 0}
+      frame_id: ''
+    mode: 2
+    roll_angle: 0.0
+    pitch_angle: 0.0
+    yaw_angle: 60.0
+    roll_rate: 0.0
+    pitch_rate: 0.0
+    yaw_rate: 0.0" -r 10
+    
+    # gimbal image of uav0
+    rostopic hz /uav0/amov_gimbal_ros/gimbal_image
+    ```
+    The gimbal angle is limited by roll [-45,45], pitch [90, -30] and yaw [-60, 60] degrees, where the roll and pitch are controlled as imu angle and yaw as rotor angle.
+
+4. You can use QGroundControl to arm and launch vehicle or your mavros scripts to control the UAV flight and gimbals.
+
+5. Move the UGV to see the tracking performance:
+
+    ```bash
+    rostopic pub /ugv0/cmd_vel geometry_msgs/Twist "linear:
+      x: 0.5
+      y: 0.0
+      z: 0.0
+    angular:
+      x: 0.1
+      y: 0.0
+      z: 0.0" -r 10
+    ```
+
+![img](pictures/multi_gimbals.png)
